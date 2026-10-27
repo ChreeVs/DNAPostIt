@@ -8,7 +8,6 @@ import {
   SlidersIcon,
   FolderIcon,
   PlusIcon,
-  HelpCircleIcon,
   ChevronLeftIcon,
   RefreshCwIcon
 } from './Icons';
@@ -258,18 +257,6 @@ export default function Sidebar({
         )}
       </nav>
 
-      {/* Sidebar Footer */}
-      <div className="pubblie-sidebar-footer">
-        <div
-          className={`pubblie-footer-link ${activeView === 'settings' ? 'active' : ''}`}
-          onClick={() => setActiveView('settings')}
-          style={{ cursor: 'pointer' }}
-          title="Impostazioni Piattaforma (Hub MCP, Storage pCloud, Docker Server)"
-        >
-          <SlidersIcon className="svg-icon-sm" />
-          <span>Impostazioni Piattaforma</span>
-        </div>
-      </div>
     </aside>
   );
 }
