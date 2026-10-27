@@ -260,17 +260,6 @@ export default function App() {
           />
         )}
 
-        {/* OTHER PROJECT SECTIONS */}
-        {['contents', 'igfeed', 'comments', 'analytics'].includes(activeView) && (
-          <div style={{ padding: '40px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <h2 style={{ fontSize: '1.4rem', textTransform: 'capitalize', color: 'var(--text-dark)' }}>
-              Sezione {activeView} ({currentProject.name})
-            </h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-              Questa sezione è attiva per il workspace <strong>{currentProject.name}</strong>. Clicca su <strong>Calendario</strong> o su <strong>TORNA ALLA HOME</strong> per tornare alla visione complessiva.
-            </p>
-          </div>
-        )}
       </main>
 
       {/* Modern Post Composer Modal */}

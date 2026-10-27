@@ -3,12 +3,8 @@ import {
   DnaPostItLogo,
   HomeIcon,
   PencilIcon,
-  ContentIcon,
   CalendarIcon,
-  Grid3x3Icon,
-  ChatBubbleIcon,
   LinkChainIcon,
-  AnalyticsIcon,
   SlidersIcon,
   FolderIcon,
   PlusIcon,
@@ -214,43 +210,11 @@ export default function Sidebar({
             </div>
 
             <div
-              className={`pubblie-nav-item ${activeView === 'contents' ? 'active' : ''}`}
-              onClick={() => setActiveView('contents')}
-            >
-              <ContentIcon className="svg-icon" />
-              <span>Contenuti</span>
-            </div>
-
-            <div
-              className={`pubblie-nav-item ${activeView === 'igfeed' ? 'active' : ''}`}
-              onClick={() => setActiveView('igfeed')}
-            >
-              <Grid3x3Icon className="svg-icon" />
-              <span>IG Feed</span>
-            </div>
-
-            <div
               className={`pubblie-nav-item ${activeView === 'channels' ? 'active' : ''}`}
               onClick={() => setActiveView('channels')}
             >
               <LinkChainIcon className="svg-icon" />
               <span>Canali Social</span>
-            </div>
-
-            <div
-              className={`pubblie-nav-item ${activeView === 'comments' ? 'active' : ''}`}
-              onClick={() => setActiveView('comments')}
-            >
-              <ChatBubbleIcon className="svg-icon" />
-              <span>Commenti</span>
-            </div>
-
-            <div
-              className={`pubblie-nav-item ${activeView === 'analytics' ? 'active' : ''}`}
-              onClick={() => setActiveView('analytics')}
-            >
-              <AnalyticsIcon className="svg-icon" />
-              <span>Analytics</span>
             </div>
 
             <div
