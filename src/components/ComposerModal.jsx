@@ -3,7 +3,6 @@ import {
   XIcon,
   PlusIcon,
   CheckIcon,
-  ScissorsIcon,
   UploadIcon,
   ClockIcon,
   InstagramIcon,
@@ -22,8 +21,7 @@ export default function ComposerModal({
   onClose,
   onSavePost,
   initialDate,
-  initialData,
-  onOpenSplitter
+  initialData
 }) {
   if (!isOpen) return null;
 
@@ -210,22 +208,10 @@ export default function ComposerModal({
               />
             </div>
 
-            {/* Media Upload & Carousel Splitter Section */}
+            {/* Media Upload Section */}
             <div className="media-section-card">
               <div className="media-actions-bar">
-                <span className="section-label">Media & Caroselli ({mediaUrls.length})</span>
-
-                <button
-                  className="btn-secondary"
-                  onClick={() => {
-                    onClose();
-                    onOpenSplitter();
-                  }}
-                  style={{ fontSize: '0.78rem', padding: '6px 10px' }}
-                >
-                  <ScissorsIcon className="svg-icon-sm" />
-                  <span>Apri Carousel Splitter</span>
-                </button>
+                <span className="section-label">Media & Allegati ({mediaUrls.length})</span>
               </div>
 
               {/* Upload Dropzone */}

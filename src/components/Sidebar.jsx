@@ -1,155 +1,160 @@
 import React from 'react';
 import {
-  LogoIcon,
+  PubblieLogo,
+  PencilIcon,
+  ContentIcon,
   CalendarIcon,
-  PlusIcon,
-  ScissorsIcon,
-  LayersIcon,
-  ImageIcon,
-  BotIcon,
-  ServerIcon,
-  SettingsIcon,
+  Grid3x3Icon,
+  ChatBubbleIcon,
+  LinkChainIcon,
+  IntegrationsIcon,
+  AnalyticsIcon,
+  UsersGroupIcon,
+  HashGridIcon,
+  SlidersIcon,
+  FolderIcon,
+  HelpCircleIcon,
+  PhoneIcon,
+  ChevronLeftIcon,
   ChevronDownIcon
 } from './Icons';
 
 export default function Sidebar({
   activeView,
   setActiveView,
-  onOpenComposer,
-  projects,
-  currentProject,
-  setCurrentProject,
-  postsCount
+  onOpenComposer
 }) {
   return (
-    <aside className="sidebar">
-      {/* Header & Brand */}
-      <div className="sidebar-header">
-        <div className="brand-container">
-          <div className="brand-logo">
-            <LogoIcon className="svg-icon" />
-          </div>
-          <div>
-            <div className="brand-title">
-              DNA<span>PostIt</span>
-              <span className="brand-badge">STUDIO</span>
-            </div>
-          </div>
+    <aside className="pubblie-sidebar">
+      {/* Brand Header */}
+      <div className="pubblie-sidebar-header">
+        <div className="pubblie-logo-row">
+          <PubblieLogo className="pubblie-logo-svg" />
+          <span className="pubblie-brand-name">Pubblie</span>
         </div>
 
-        {/* Project Selector */}
-        <div className="project-selector" title="Cambia Spazio di Lavoro">
-          <div className="project-info">
-            <div className="project-avatar">{currentProject.avatar}</div>
-            <div className="project-name">{currentProject.name}</div>
+        {/* Torna alla home */}
+        <div className="pubblie-back-home" onClick={() => setActiveView('calendar')}>
+          <ChevronLeftIcon className="svg-icon-sm" />
+          <span>TORNA ALLA HOME</span>
+        </div>
+
+        {/* Current Project Tag */}
+        <div className="pubblie-active-project-pill">
+          <span className="project-orange-dot" />
+          <span className="project-title-text">PAA</span>
+        </div>
+      </div>
+
+      {/* Main Nav Items */}
+      <nav className="pubblie-nav-list">
+        <div
+          className="pubblie-nav-item create-action"
+          onClick={onOpenComposer}
+        >
+          <PencilIcon className="svg-icon" />
+          <span>Crea un nuovo post</span>
+        </div>
+
+        <div
+          className={`pubblie-nav-item ${activeView === 'contents' ? 'active' : ''}`}
+          onClick={() => setActiveView('contents')}
+        >
+          <ContentIcon className="svg-icon" />
+          <span>Contenuti</span>
+        </div>
+
+        <div
+          className={`pubblie-nav-item ${activeView === 'calendar' ? 'active' : ''}`}
+          onClick={() => setActiveView('calendar')}
+        >
+          <CalendarIcon className="svg-icon" />
+          <span>Calendario</span>
+        </div>
+
+        <div
+          className={`pubblie-nav-item ${activeView === 'igfeed' ? 'active' : ''}`}
+          onClick={() => setActiveView('igfeed')}
+        >
+          <Grid3x3Icon className="svg-icon" />
+          <span>IG Feed</span>
+        </div>
+
+        <div
+          className={`pubblie-nav-item ${activeView === 'comments' ? 'active' : ''}`}
+          onClick={() => setActiveView('comments')}
+        >
+          <ChatBubbleIcon className="svg-icon" />
+          <span>Commenti</span>
+        </div>
+
+        <div
+          className={`pubblie-nav-item ${activeView === 'channels' ? 'active' : ''}`}
+          onClick={() => setActiveView('channels')}
+        >
+          <LinkChainIcon className="svg-icon" />
+          <span>Canali</span>
+        </div>
+
+        <div
+          className={`pubblie-nav-item ${activeView === 'integrations' ? 'active' : ''}`}
+          onClick={() => setActiveView('integrations')}
+        >
+          <IntegrationsIcon className="svg-icon" />
+          <span>Integrazioni (MCP & S3)</span>
+        </div>
+
+        <div
+          className={`pubblie-nav-item ${activeView === 'analytics' ? 'active' : ''}`}
+          onClick={() => setActiveView('analytics')}
+        >
+          <AnalyticsIcon className="svg-icon" />
+          <span>Analytics</span>
+        </div>
+
+        <div
+          className={`pubblie-nav-item ${activeView === 'team' ? 'active' : ''}`}
+          onClick={() => setActiveView('team')}
+        >
+          <UsersGroupIcon className="svg-icon" />
+          <span>Team</span>
+        </div>
+
+        <div
+          className="pubblie-nav-item dropdown-toggle"
+          onClick={() => {}}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <HashGridIcon className="svg-icon" />
+            <span>Varie</span>
           </div>
           <ChevronDownIcon className="svg-icon-sm" />
         </div>
-      </div>
-
-      {/* Primary Action Button */}
-      <div className="action-btn-container">
-        <button className="btn-create-post" onClick={onOpenComposer}>
-          <PlusIcon className="svg-icon" />
-          <span>Crea Nuovo Post</span>
-        </button>
-      </div>
-
-      {/* Nav Menu */}
-      <nav className="sidebar-nav">
-        <div className="nav-section-title">Pianificazione</div>
 
         <div
-          className={`nav-item ${activeView === 'calendar' ? 'active' : ''}`}
-          onClick={() => setActiveView('calendar')}
-        >
-          <div className="nav-item-content">
-            <CalendarIcon className="svg-icon nav-icon" />
-            <span>Calendario</span>
-          </div>
-          <span className="nav-badge active-glow">{postsCount}</span>
-        </div>
-
-        <div
-          className={`nav-item ${activeView === 'splitter' ? 'active' : ''}`}
-          onClick={() => setActiveView('splitter')}
-        >
-          <div className="nav-item-content">
-            <ScissorsIcon className="svg-icon nav-icon" />
-            <span>Carousel Splitter</span>
-          </div>
-          <span className="nav-badge">4:5 / 1:1</span>
-        </div>
-
-        <div
-          className={`nav-item ${activeView === 'media' ? 'active' : ''}`}
-          onClick={() => setActiveView('media')}
-        >
-          <div className="nav-item-content">
-            <ImageIcon className="svg-icon nav-icon" />
-            <span>Libreria Media (S3)</span>
-          </div>
-        </div>
-
-        <div className="nav-section-title">Canali & Agenti</div>
-
-        <div
-          className={`nav-item ${activeView === 'channels' ? 'active' : ''}`}
-          onClick={() => setActiveView('channels')}
-        >
-          <div className="nav-item-content">
-            <LayersIcon className="svg-icon nav-icon" />
-            <span>Canali Social</span>
-          </div>
-          <span className="nav-badge">7 Attivi</span>
-        </div>
-
-        <div
-          className={`nav-item ${activeView === 'mcp' ? 'active' : ''}`}
-          onClick={() => setActiveView('mcp')}
-        >
-          <div className="nav-item-content">
-            <BotIcon className="svg-icon nav-icon" />
-            <span>Hub MCP (AI Agent)</span>
-          </div>
-          <span className="nav-badge active-glow">Port 3001</span>
-        </div>
-
-        <div
-          className={`nav-item ${activeView === 'settings' ? 'active' : ''}`}
+          className={`pubblie-nav-item ${activeView === 'settings' ? 'active' : ''}`}
           onClick={() => setActiveView('settings')}
         >
-          <div className="nav-item-content">
-            <SettingsIcon className="svg-icon nav-icon" />
-            <span>Impostazioni Server</span>
-          </div>
+          <SlidersIcon className="svg-icon" />
+          <span>Impostazioni</span>
+        </div>
+
+        {/* Vedi tutti i progetti */}
+        <div className="pubblie-nav-item folder-item" style={{ marginTop: '16px' }}>
+          <FolderIcon className="svg-icon" style={{ color: '#d97706' }} />
+          <span>Vedi tutti i progetti</span>
         </div>
       </nav>
 
-      {/* Footer / Infrastructure Health Monitor */}
-      <div className="sidebar-footer">
-        <div className="infra-status-card">
-          <div className="infra-status-row">
-            <span className="infra-label">
-              <span className="status-indicator online"></span>
-              Server Dedicato
-            </span>
-            <span className="infra-val">Ubuntu 24</span>
-          </div>
-          <div className="infra-status-row">
-            <span className="infra-label">
-              <span className="status-indicator violet"></span>
-              AWS Media Cloud
-            </span>
-            <span className="infra-val">S3 + CDN</span>
-          </div>
-          <div className="infra-status-row">
-            <span className="infra-label">
-              <span className="status-indicator online"></span>
-              Worker BullMQ
-            </span>
-            <span className="infra-val">0 lag</span>
-          </div>
+      {/* Sidebar Footer */}
+      <div className="pubblie-sidebar-footer">
+        <div className="pubblie-footer-link">
+          <HelpCircleIcon className="svg-icon-sm" />
+          <span>Aiuto</span>
+        </div>
+        <div className="pubblie-footer-link">
+          <PhoneIcon className="svg-icon-sm" />
+          <span>Assistenza</span>
         </div>
       </div>
     </aside>

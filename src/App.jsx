@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
-import Topbar from './components/Topbar';
 import CalendarView from './components/CalendarView';
-import CarouselSplitterView from './components/CarouselSplitterView';
 import ChannelsView from './components/ChannelsView';
-import MediaLibraryView from './components/MediaLibraryView';
 import McpHubView from './components/McpHubView';
 import SettingsView from './components/SettingsView';
 import ComposerModal from './components/ComposerModal';
@@ -12,19 +9,13 @@ import {
   INITIAL_PROJECTS,
   INITIAL_CHANNELS,
   INITIAL_POSTS,
-  INITIAL_MEDIA_LIBRARY,
   MCP_TOOLS_REGISTRY
 } from './mockData';
 
 export default function App() {
   const [activeView, setActiveView] = useState('calendar');
-  const [projects] = useState(INITIAL_PROJECTS);
-  const [currentProject, setCurrentProject] = useState(INITIAL_PROJECTS[0]);
   const [channels] = useState(INITIAL_CHANNELS);
   const [posts, setPosts] = useState(INITIAL_POSTS);
-  const [mediaLibrary] = useState(INITIAL_MEDIA_LIBRARY);
-
-  const [selectedChannelFilter, setSelectedChannelFilter] = useState('all');
 
   // Composer Modal State
   const [isComposerOpen, setIsComposerOpen] = useState(false);
@@ -45,8 +36,8 @@ export default function App() {
   };
 
   const handleSavePost = (savedPost) => {
-    setPosts(prev => {
-      const existsIndex = prev.findIndex(p => p.id === savedPost.id);
+    setPosts((prev) => {
+      const existsIndex = prev.findIndex((p) => p.id === savedPost.id);
       if (existsIndex >= 0) {
         const updated = [...prev];
         updated[existsIndex] = savedPost;
@@ -57,95 +48,72 @@ export default function App() {
     });
   };
 
-  // Carousel Slices flow to Composer
-  const handleSendSlicesToComposer = (slicedDataUrls) => {
-    setComposerInitialData({
-      id: `post-carousel-${Date.now()}`,
-      platforms: ['instagram', 'linkedin'],
-      content: 'Nuovo approfondimento a scorrimento orizzontale. Scorri le slide per tutti i dettagli tecnici.',
-      mediaUrls: slicedDataUrls,
-      mediaType: 'carousel',
-      firstComment: 'Commenta per ricevere la documentazione tecnica in formato PDF.'
-    });
-    setIsComposerOpen(true);
-  };
-
-  // Media Library to Splitter flow
-  const handleSendMediaToSplitter = (mediaUrl) => {
-    setActiveView('splitter');
-  };
-
   return (
-    <div className="app-container">
-      {/* Sidebar Navigation */}
+    <div className="pubblie-app-layout">
+      {/* Pubblie Left Sidebar */}
       <Sidebar
         activeView={activeView}
         setActiveView={setActiveView}
         onOpenComposer={() => handleOpenComposer()}
-        projects={projects}
-        currentProject={currentProject}
-        setCurrentProject={setCurrentProject}
-        postsCount={posts.length}
       />
 
-      {/* Main Area */}
-      <div className="main-wrapper">
-        <Topbar
-          activeView={activeView}
-          selectedChannelFilter={selectedChannelFilter}
-          setSelectedChannelFilter={setSelectedChannelFilter}
-          onOpenComposer={() => handleOpenComposer()}
-          onOpenSplitter={() => setActiveView('splitter')}
-        />
-
-        {/* View Router */}
+      {/* Main Content Area */}
+      <main className="pubblie-main-wrapper">
         {activeView === 'calendar' && (
           <CalendarView
             posts={posts}
-            selectedChannelFilter={selectedChannelFilter}
+            channels={channels}
             onOpenComposer={handleOpenComposer}
             onSelectPost={handleSelectPostToEdit}
           />
         )}
 
-        {activeView === 'splitter' && (
-          <CarouselSplitterView
-            onSendToComposer={handleSendSlicesToComposer}
-            mediaLibrary={mediaLibrary}
-          />
-        )}
-
         {activeView === 'channels' && (
-          <ChannelsView channels={channels} />
+          <div style={{ padding: '24px', flex: 1, overflowY: 'auto' }}>
+            <ChannelsView channels={channels} />
+          </div>
         )}
 
-        {activeView === 'media' && (
-          <MediaLibraryView
-            mediaItems={mediaLibrary}
-            onSendToSplitter={handleSendMediaToSplitter}
-          />
-        )}
-
-        {activeView === 'mcp' && (
-          <McpHubView
-            toolsRegistry={MCP_TOOLS_REGISTRY}
-            onAgentSchedulePost={handleSavePost}
-          />
+        {activeView === 'integrations' && (
+          <div style={{ padding: '24px', flex: 1, overflowY: 'auto' }}>
+            <McpHubView
+              toolsRegistry={MCP_TOOLS_REGISTRY}
+              onAgentSchedulePost={handleSavePost}
+            />
+          </div>
         )}
 
         {activeView === 'settings' && (
-          <SettingsView />
+          <div style={{ padding: '24px', flex: 1, overflowY: 'auto' }}>
+            <SettingsView />
+          </div>
         )}
-      </div>
 
-      {/* Post Composer Modal */}
+        {/* Placeholder screens for other views to ensure seamless navigation */}
+        {['contents', 'igfeed', 'comments', 'analytics', 'team'].includes(activeView) && (
+          <div style={{ padding: '40px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <h2 style={{ fontSize: '1.4rem', textTransform: 'capitalize' }}>
+              Sezione {activeView}
+            </h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+              Questa sezione è attiva nel workspace di PAA. Clicca su <strong>Calendario</strong> nella barra laterale per tornare al piano editoriale principale.
+            </p>
+            <div>
+              <button className="btn-secondary" onClick={() => setActiveView('calendar')}>
+                Torna al Calendario Editoriale
+              </button>
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* Composer Modal */}
       <ComposerModal
         isOpen={isComposerOpen}
         onClose={() => setIsComposerOpen(false)}
         onSavePost={handleSavePost}
         initialDate={composerInitialDate}
         initialData={composerInitialData}
-        onOpenSplitter={() => setActiveView('splitter')}
       />
     </div>
   );
