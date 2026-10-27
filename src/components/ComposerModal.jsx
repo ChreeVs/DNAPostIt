@@ -21,7 +21,9 @@ export default function ComposerModal({
   onClose,
   onSavePost,
   initialDate,
-  initialData
+  initialData,
+  projects = [],
+  currentProject = null
 }) {
   if (!isOpen) return null;
 
@@ -31,9 +33,7 @@ export default function ComposerModal({
   const [content, setContent] = useState(initialData?.content || '');
   const [firstComment, setFirstComment] = useState(initialData?.firstComment || '');
   const [enableFirstComment, setEnableFirstComment] = useState(!!initialData?.firstComment);
-  const [mediaUrls, setMediaUrls] = useState(initialData?.mediaUrls || [
-    'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&auto=format&fit=crop&q=80'
-  ]);
+  const [mediaUrls, setMediaUrls] = useState(initialData?.mediaUrls || []);
   const [previewPlatform, setPreviewPlatform] = useState(selectedPlatforms[0] || 'instagram');
   const [scheduledDate, setScheduledDate] = useState(
     initialData?.scheduledDate
@@ -103,7 +103,7 @@ export default function ComposerModal({
 
     const newPost = {
       id: initialData?.id || `post-${Date.now()}`,
-      projectId: 'proj-1',
+      projectId: currentProject ? currentProject.id : (projects && projects[0] ? projects[0].id : null),
       channel: selectedPlatforms[0],
       platforms: selectedPlatforms,
       content,

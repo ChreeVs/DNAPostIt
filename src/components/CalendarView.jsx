@@ -157,7 +157,7 @@ export default function CalendarView({
   const displayedPosts = posts.filter((p) => {
     if (!isGlobalDashboard) {
       // In project mode: only this project's posts
-      return p.projectId === (currentProject ? currentProject.id : 'proj-paa');
+      return currentProject ? p.projectId === currentProject.id : false;
     }
     // In global dashboard: check filter
     if (selectedProjectFilter !== 'all') {
@@ -235,7 +235,7 @@ export default function CalendarView({
               }}
             />
             <h1 className="pubblie-project-title">
-              {currentProject ? currentProject.name : 'PAA'}
+              {currentProject ? currentProject.name : 'Nessun Progetto Selezionato'}
             </h1>
           </div>
 

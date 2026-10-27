@@ -142,8 +142,25 @@ export default function ProjectsView({
 
       {/* Projects Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '20px' }}>
-        {projects.map((proj) => {
-          const isActive = proj.id === currentProjectId;
+        {projects.length === 0 ? (
+          <div style={{ background: '#ffffff', border: '1px dashed var(--border-grid)', borderRadius: '10px', padding: '48px 24px', textAlign: 'center', gridColumn: '1 / -1' }}>
+            <FolderIcon className="svg-icon-lg" style={{ color: 'var(--primary-granata)', marginBottom: '12px' }} />
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '6px' }}>Nessun progetto creato</h3>
+            <p style={{ fontSize: '0.86rem', color: 'var(--text-secondary)', maxWidth: '480px', margin: '0 auto 20px auto' }}>
+              Non ci sono ancora workspace attivi. Clicca su "Crea Nuovo Progetto" per configurare il tuo primo brand o cliente.
+            </p>
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(true)}
+              className="composer-submit-btn"
+              style={{ padding: '9px 22px', borderRadius: '6px', fontSize: '0.84rem', fontWeight: 700 }}
+            >
+              Crea Nuovo Progetto
+            </button>
+          </div>
+        ) : (
+          projects.map((proj) => {
+            const isActive = proj.id === currentProjectId;
           return (
             <div
               key={proj.id}
@@ -315,7 +332,7 @@ export default function ProjectsView({
               </div>
             </div>
           );
-        })}
+        }))}
       </div>
 
       {/* Modal Crea Nuovo Progetto */}
@@ -361,7 +378,7 @@ export default function ProjectsView({
                 <input
                   type="text"
                   required
-                  placeholder="Es: DNA Studio, PAA Fashion, TechCorp..."
+                  placeholder="Es: Mio Brand, Azienda Spa, Studio Creativo..."
                   value={newProject.name}
                   onChange={handleNameChange}
                   className="date-input-dark"

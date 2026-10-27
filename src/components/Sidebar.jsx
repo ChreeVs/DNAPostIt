@@ -62,7 +62,7 @@ export default function Sidebar({
         </div>
 
         {/* If in Project Mode: Show TORNA ALLA HOME and Active Project Pill */}
-        {!isGlobalMode && (
+        {!isGlobalMode && currentProject && (
           <>
             <div
               className="pubblie-back-home"
@@ -82,10 +82,10 @@ export default function Sidebar({
             >
               <span
                 className="project-orange-dot"
-                style={{ backgroundColor: currentProject ? currentProject.color : 'var(--primary-granata)' }}
+                style={{ backgroundColor: currentProject.color || 'var(--primary-granata)' }}
               />
               <span className="project-title-text">
-                {currentProject ? currentProject.name : 'PAA'}
+                {currentProject.name}
               </span>
             </div>
           </>
@@ -121,36 +121,42 @@ export default function Sidebar({
 
             {/* List of Projects with colored dots */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', paddingLeft: '8px' }}>
-              {projects.map((proj) => {
-                const isSelected = currentProject && currentProject.id === proj.id;
-                return (
-                  <div
-                    key={proj.id}
-                    onClick={() => handleSelectProjectItem(proj)}
-                    className="pubblie-nav-item"
-                    style={{
-                      padding: '7px 12px',
-                      fontSize: '0.84rem',
-                      fontWeight: isSelected ? 700 : 500,
-                      gap: '10px'
-                    }}
-                    title={`Apri workspace ${proj.name}`}
-                  >
-                    <span
+              {projects.length === 0 ? (
+                <div style={{ padding: '6px 14px', fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', fontStyle: 'italic' }}>
+                  Nessun progetto
+                </div>
+              ) : (
+                projects.map((proj) => {
+                  const isSelected = currentProject && currentProject.id === proj.id;
+                  return (
+                    <div
+                      key={proj.id}
+                      onClick={() => handleSelectProjectItem(proj)}
+                      className="pubblie-nav-item"
                       style={{
-                        width: '9px',
-                        height: '9px',
-                        borderRadius: '50%',
-                        backgroundColor: proj.color || '#f97316',
-                        flexShrink: 0
+                        padding: '7px 12px',
+                        fontSize: '0.84rem',
+                        fontWeight: isSelected ? 700 : 500,
+                        gap: '10px'
                       }}
-                    />
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {proj.name}
-                    </span>
-                  </div>
-                );
-              })}
+                      title={`Apri workspace ${proj.name}`}
+                    >
+                      <span
+                        style={{
+                          width: '9px',
+                          height: '9px',
+                          borderRadius: '50%',
+                          backgroundColor: proj.color || '#f97316',
+                          flexShrink: 0
+                        }}
+                      />
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {proj.name}
+                      </span>
+                    </div>
+                  );
+                })
+              )}
             </div>
 
             {/* Vedi tutti i progetti */}

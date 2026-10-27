@@ -16,23 +16,18 @@ import {
 export default function App() {
   // Navigation & Workspace Mode
   // 'global' = viewing platform Dashboard (all projects calendar, projects list on left)
-  // 'project' = viewing specific project workspace (PAA, Broker, etc. with single-project menu)
+  // 'project' = viewing specific project workspace with dedicated single-project menu
   const [workspaceMode, setWorkspaceMode] = useState('global');
   const [activeView, setActiveView] = useState('dashboard');
 
-  // Projects State
+  // Projects State - completely empty, zero placeholder projects
   const [projects, setProjects] = useState(INITIAL_PROJECTS);
   const [currentProjectId, setCurrentProjectId] = useState(
-    INITIAL_PROJECTS.length > 0 ? INITIAL_PROJECTS[2].id : 'proj-paa' // PAA by default
+    INITIAL_PROJECTS.length > 0 ? INITIAL_PROJECTS[0].id : null
   );
 
   const currentProject =
-    projects.find((p) => p.id === currentProjectId) || projects[0] || {
-      id: 'proj-paa',
-      name: 'PAA',
-      slug: 'paa',
-      color: '#f97316'
-    };
+    projects.find((p) => p.id === currentProjectId) || (projects.length > 0 ? projects[0] : null);
 
   // Channels & Posts State
   const [channels, setChannels] = useState(INITIAL_CHANNELS);
@@ -109,8 +104,14 @@ export default function App() {
   const handleDeleteProject = (projectId) => {
     setProjects((prev) => {
       const filtered = prev.filter((p) => p.id !== projectId);
-      if (currentProjectId === projectId && filtered.length > 0) {
-        setCurrentProjectId(filtered[0].id);
+      if (currentProjectId === projectId) {
+        if (filtered.length > 0) {
+          setCurrentProjectId(filtered[0].id);
+        } else {
+          setCurrentProjectId(null);
+          setWorkspaceMode('global');
+          setActiveView('dashboard');
+        }
       }
       return filtered;
     });

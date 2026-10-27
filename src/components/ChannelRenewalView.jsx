@@ -302,7 +302,7 @@ export default function ChannelRenewalView({ channels, onRenewChannel, onRenewAl
                         fontSize: '0.75rem'
                       }}
                     >
-                      {ch.projectName || 'PAA'}
+                      {ch.projectName || '-'}
                     </span>
                   </td>
 

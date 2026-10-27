@@ -24,7 +24,7 @@ export default function McpHubView({ toolsRegistry, onAgentSchedulePost }) {
       // Create new scheduled post via MCP tool execution
       const generatedPost = {
         id: `post-mcp-${Date.now()}`,
-        projectId: 'proj-paa',
+        projectId: 'proj-default',
         channel: 'linkedin',
         platforms: ['linkedin', 'instagram'],
         content: "Ottimizzazione avanzata di container Docker su server dedicati: come isolare Redis, PostgreSQL e worker BullMQ massimizzando il throughput I/O senza memory leaks.\n\nEcco i 3 accorgimenti applicati nel nostro ambiente di produzione:\n1. Utilizzo di overlay2 storage driver con limitazione volumetrica per log rotativi.\n2. CPU pinning e memory limits espliciti sui worker intensivi FFmpeg.\n3. Configurazione sysctl per vm.overcommit_memory=1 per evitare failover di Redis.",

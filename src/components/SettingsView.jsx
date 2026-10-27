@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   FolderIcon,
   SlidersIcon,
@@ -31,12 +31,26 @@ export default function SettingsView({
   const [activeTab, setActiveTab] = useState('project'); // 'project' | 'channels' | 'mcp' | 'aws' | 'server'
 
   // Project Form State
-  const [projName, setProjName] = useState(currentProject ? currentProject.name : 'PAA Communication');
-  const [projSlug, setProjSlug] = useState(currentProject ? currentProject.slug : 'paa-communication');
-  const [projDesc, setProjDesc] = useState(currentProject ? currentProject.description : 'Gestione canali editoriali e campagne social PAA.');
+  const [projName, setProjName] = useState(currentProject ? currentProject.name : '');
+  const [projSlug, setProjSlug] = useState(currentProject ? currentProject.slug : '');
+  const [projDesc, setProjDesc] = useState(currentProject ? currentProject.description : '');
   const [projColor, setProjColor] = useState(currentProject ? currentProject.color : '#800020');
   const [projTimezone, setProjTimezone] = useState('Europe/Rome (UTC+1)');
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  useEffect(() => {
+    if (currentProject) {
+      setProjName(currentProject.name || '');
+      setProjSlug(currentProject.slug || '');
+      setProjDesc(currentProject.description || '');
+      setProjColor(currentProject.color || '#800020');
+    } else {
+      setProjName('');
+      setProjSlug('');
+      setProjDesc('');
+      setProjColor('#800020');
+    }
+  }, [currentProject]);
 
   // Media Storage State (pCloud / S3)
   const [storageProvider, setStorageProvider] = useState('pcloud'); // 'pcloud' | 's3'
@@ -218,7 +232,16 @@ export default function SettingsView({
 
       {/* TAB 1: PROGETTO & BRAND */}
       {activeTab === 'project' && (
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
+        !currentProject ? (
+          <div style={{ background: '#ffffff', border: '1px dashed var(--border-grid)', borderRadius: '10px', padding: '48px 24px', textAlign: 'center' }}>
+            <FolderIcon className="svg-icon-lg" style={{ color: 'var(--primary-granata)', marginBottom: '12px' }} />
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '6px' }}>Nessun Progetto Selezionato</h3>
+            <p style={{ fontSize: '0.86rem', color: 'var(--text-secondary)', maxWidth: '440px', margin: '0 auto' }}>
+              Seleziona un progetto esistente oppure creane uno nuovo dalla sezione Progetti per gestirne impostazioni, colore distintivo e fuso orario.
+            </p>
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
           <div style={{ background: '#ffffff', border: '1px solid var(--border-grid)', borderRadius: '10px', padding: '24px', boxShadow: '0 1px 4px rgba(0,0,0,0.03)' }}>
             <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '18px' }}>
               Dettagli Workspace Progetto
@@ -359,6 +382,7 @@ export default function SettingsView({
             </div>
           </div>
         </div>
+        )
       )}
 
       {/* TAB 2: CANALI SOCIAL */}
