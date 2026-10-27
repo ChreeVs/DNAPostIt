@@ -1,0 +1,146 @@
+version: '3.8'
+
+services:
+  # ==========================================================
+  # REVERSE PROXY & AUTOMATIC SSL (CADDY)
+  # ==========================================================
+  caddy:
+    image: caddy:2-alpine
+    container_name: dnapostit-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+      - frontend
+    networks:
+      - dnapostit-net
+
+  # ==========================================================
+  # RELATIONAL DATABASE (POSTGRESQL 16)
+  # ==========================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: dnapostit-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-dnapostit}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secure_dnapostit_password_2026}
+      POSTGRES_DB: ${DB_NAME:-dnapostit_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-dnapostit} -d ${DB_NAME:-dnapostit_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dnapostit-net
+
+  # ==========================================================
+  # IN-MEMORY QUEUES & CACHE (REDIS 7)
+  # ==========================================================
+  redis:
+    image: redis:7-alpine
+    container_name: dnapostit-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:-secure_redis_pwd_2026}"]
+    volumes:
+      - redis_data:/data
+    ports:
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-secure_redis_pwd_2026}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dnapostit-net
+
+  # ==========================================================
+  # BACKEND API & MCP SERVER
+  # ==========================================================
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: dnapostit-api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      MCP_PORT: 3001
+      DATABASE_URL: postgresql://${DB_USER:-dnapostit}:${DB_PASSWORD:-secure_dnapostit_password_2026}@postgres:5432/${DB_NAME:-dnapostit_db}?schema=public
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-secure_redis_pwd_2026}
+      AWS_REGION: ${AWS_REGION}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET}
+      AWS_CLOUDFRONT_DOMAIN: ${AWS_CLOUDFRONT_DOMAIN}
+      JWT_SECRET: ${JWT_SECRET:-super_secret_jwt_key_dnapostit}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - dnapostit-net
+
+  # ==========================================================
+  # BACKGROUND WORKER & FFMPEG ENGINES (BULLMQ)
+  # ==========================================================
+  worker:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.worker
+    container_name: dnapostit-worker
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${DB_USER:-dnapostit}:${DB_PASSWORD:-secure_dnapostit_password_2026}@postgres:5432/${DB_NAME:-dnapostit_db}?schema=public
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-secure_redis_pwd_2026}
+      AWS_REGION: ${AWS_REGION}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET}
+      AWS_CLOUDFRONT_DOMAIN: ${AWS_CLOUDFRONT_DOMAIN}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - dnapostit-net
+
+  # ==========================================================
+  # FRONTEND WEB APPLICATION (VITE / NGINX)
+  # ==========================================================
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: dnapostit-frontend
+    restart: unless-stopped
+    networks:
+      - dnapostit-net
+
+networks:
+  dnapostit-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  caddy_data:
+  caddy_config:

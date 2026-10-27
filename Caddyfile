@@ -1,0 +1,34 @@
+{
+    email {$ACME_EMAIL:admin@example.com}
+    admin off
+}
+
+{$APP_DOMAIN:localhost} {
+    # Encode with gzip and zstd
+    encode gzip zstd
+
+    # API Routes
+    handle /api/* {
+        reverse_proxy api:4000
+    }
+
+    # MCP SSE & HTTP endpoint
+    handle /mcp* {
+        reverse_proxy api:3001 {
+            flush_interval -1
+        }
+    }
+
+    # Frontend Static & Client Routing
+    handle {
+        reverse_proxy frontend:80
+    }
+
+    # Security Headers
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+}

@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PostStatus {
+  DRAFT
+  SCHEDULED
+  PROCESSING
+  PUBLISHED
+  FAILED
+}
+
+enum MediaType {
+  TEXT
+  IMAGE
+  VIDEO
+  CAROUSEL
+}
+
+enum SocialPlatform {
+  FACEBOOK
+  INSTAGRAM
+  TIKTOK
+  LINKEDIN
+  YOUTUBE
+  THREADS
+  GMB
+}
+
+model Workspace {
+  id             String          @id @default(cuid())
+  name           String
+  slug           String          @unique
+  avatar         String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  socialAccounts SocialAccount[]
+  posts          Post[]
+  mediaAssets    MediaAsset[]
+
+  @@map("workspaces")
+}
+
+model SocialAccount {
+  id             String          @id @default(cuid())
+  workspaceId    String
+  platform       SocialPlatform
+  accountName    String
+  accountHandle  String
+  externalId     String          // Remote Page ID, Profile ID, or Channel ID
+  accessToken    String          // Encrypted AES-256
+  refreshToken   String?         // Encrypted AES-256
+  tokenExpiresAt DateTime?
+  scopes         String[]
+  metadata       Json?
+  isActive       Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  workspace      Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, platform, externalId])
+  @@map("social_accounts")
+}
+
+model Post {
+  id             String           @id @default(cuid())
+  workspaceId    String
+  content        String           @db.Text
+  platforms      SocialPlatform[]
+  mediaType      MediaType        @default(TEXT)
+  mediaUrls      String[]         @default([])
+  firstComment   String?          @db.Text
+  scheduledAt    DateTime
+  publishedAt    DateTime?
+  status         PostStatus       @default(SCHEDULED)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  workspace      Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  logs           PublicationLog[]
+
+  @@index([scheduledAt, status])
+  @@map("posts")
+}
+
+model PublicationLog {
+  id             String         @id @default(cuid())
+  postId         String
+  platform       SocialPlatform
+  status         PostStatus
+  externalPostId String?
+  externalUrl    String?
+  errorMessage   String?        @db.Text
+  attempts       Int            @default(1)
+  publishedAt    DateTime       @default(now())
+
+  post           Post           @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId, platform])
+  @@map("publication_logs")
+}
+
+model MediaAsset {
+  id             String    @id @default(cuid())
+  workspaceId    String
+  filename       String
+  s3Key          String    @unique
+  cdnUrl         String
+  mimeType       String
+  sizeBytes      Int
+  dimensions     String?
+  createdAt      DateTime  @default(now())
+
+  workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("media_assets")
+}
