@@ -246,7 +246,18 @@ export default function ChannelRenewalView({ channels, onRenewChannel, onRenewAl
             </tr>
           </thead>
           <tbody>
-            {filteredChannels.map((ch) => {
+            {filteredChannels.length === 0 ? (
+              <tr>
+                <td colSpan="6" style={{ padding: '42px 16px', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                    <KeyIcon className="svg-icon-lg" style={{ color: 'var(--text-muted)' }} />
+                    <span style={{ fontWeight: 700, color: 'var(--text-dark)' }}>Nessun canale collegato</span>
+                    <span style={{ fontSize: '0.8rem' }}>I canali social autorizzati per i vari progetti compariranno qui per il monitoraggio della scadenza token.</span>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              filteredChannels.map((ch) => {
               const isExpired = ch.expiresInDays <= 0;
               const isExpiring = ch.expiresInDays > 0 && ch.expiresInDays <= 14;
               const isCurrentlyRenewing = renewingId === ch.id;
@@ -403,7 +414,7 @@ export default function ChannelRenewalView({ channels, onRenewChannel, onRenewAl
                   </td>
                 </tr>
               );
-            })}
+            }))}
           </tbody>
         </table>
       </div>

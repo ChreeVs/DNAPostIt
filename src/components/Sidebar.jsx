@@ -13,7 +13,6 @@ import {
   FolderIcon,
   PlusIcon,
   HelpCircleIcon,
-  PhoneIcon,
   ChevronLeftIcon,
   RefreshCwIcon
 } from './Icons';
@@ -279,11 +278,7 @@ export default function Sidebar({
       <div className="pubblie-sidebar-footer">
         <div className="pubblie-footer-link" onClick={() => setActiveView('settings')}>
           <HelpCircleIcon className="svg-icon-sm" />
-          <span>Aiuto</span>
-        </div>
-        <div className="pubblie-footer-link">
-          <PhoneIcon className="svg-icon-sm" />
-          <span>Assistenza</span>
+          <span>Guida & MCP</span>
         </div>
       </div>
     </aside>

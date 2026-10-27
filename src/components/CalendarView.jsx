@@ -194,23 +194,13 @@ export default function CalendarView({
               <ChatBubbleIcon className="svg-icon" />
             </button>
 
-            <div style={{ position: 'relative', cursor: 'pointer' }} title="Notifiche piattaforma">
-              <span
-                style={{
-                  background: '#f43f5e',
-                  color: '#ffffff',
-                  fontSize: '0.68rem',
-                  fontWeight: 800,
-                  padding: '2px 7px',
-                  borderRadius: '12px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '2px'
-                }}
-              >
-                469
-              </span>
-            </div>
+            <button
+              type="button"
+              style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b', padding: '6px' }}
+              title="Notifiche piattaforma"
+            >
+              <BellIcon className="svg-icon" />
+            </button>
 
             <div
               style={{
@@ -250,48 +240,73 @@ export default function CalendarView({
           </div>
 
           <div className="pubblie-channels-counters-strip">
-            {channels.map((ch) => {
-              let icon = null;
-              if (ch.platform === 'facebook') icon = <FacebookIcon className="svg-icon-sm" />;
-              else if (ch.platform === 'instagram') icon = <InstagramIcon className="svg-icon-sm" />;
-              else if (ch.platform === 'tiktok') icon = <TikTokIcon className="svg-icon-sm" />;
-              else if (ch.platform === 'youtube') icon = <YouTubeIcon className="svg-icon-sm" />;
-              else if (ch.platform === 'linkedin') icon = <LinkedInIcon className="svg-icon-sm" />;
-              else if (ch.platform === 'threads') icon = <ThreadsIcon className="svg-icon-sm" />;
-              else if (ch.platform === 'gmb') icon = <GoogleBusinessIcon className="svg-icon-sm" />;
+            {channels.length === 0 ? (
+              <button
+                type="button"
+                onClick={onNavigateToChannels}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '5px 14px',
+                  borderRadius: '20px',
+                  border: '1px dashed var(--border-grid)',
+                  background: '#ffffff',
+                  fontSize: '0.76rem',
+                  fontWeight: 600,
+                  color: 'var(--text-secondary)',
+                  cursor: 'pointer'
+                }}
+              >
+                <PlusIcon className="svg-icon-mini" />
+                <span>Collega Canale Social</span>
+              </button>
+            ) : (
+              channels.map((ch) => {
+                let icon = null;
+                if (ch.platform === 'facebook') icon = <FacebookIcon className="svg-icon-sm" />;
+                else if (ch.platform === 'instagram') icon = <InstagramIcon className="svg-icon-sm" />;
+                else if (ch.platform === 'tiktok') icon = <TikTokIcon className="svg-icon-sm" />;
+                else if (ch.platform === 'youtube') icon = <YouTubeIcon className="svg-icon-sm" />;
+                else if (ch.platform === 'linkedin') icon = <LinkedInIcon className="svg-icon-sm" />;
+                else if (ch.platform === 'threads') icon = <ThreadsIcon className="svg-icon-sm" />;
+                else if (ch.platform === 'gmb') icon = <GoogleBusinessIcon className="svg-icon-sm" />;
 
-              const isAct = ch.active && ch.connected;
+                const isAct = ch.active && ch.connected;
 
-              return (
-                <div
-                  key={ch.id}
-                  className="pubblie-channel-bubble-col"
-                  title={`${ch.name} - ${isAct ? 'Attivo' : 'Inattivo'}`}
-                  style={{ opacity: isAct ? 1 : 0.45 }}
-                >
+                return (
                   <div
-                    className="pubblie-channel-bubble-circle"
-                    style={{ border: `1.5px solid ${ch.color}` }}
+                    key={ch.id}
+                    className="pubblie-channel-bubble-col"
+                    title={`${ch.name} - ${isAct ? 'Attivo' : 'Inattivo'}`}
+                    style={{ opacity: isAct ? 1 : 0.45 }}
                   >
-                    <span style={{ color: ch.color }}>{icon}</span>
+                    <div
+                      className="pubblie-channel-bubble-circle"
+                      style={{ border: `1.5px solid ${ch.color}` }}
+                    >
+                      <span style={{ color: ch.color }}>{icon}</span>
+                    </div>
+                    <span className="pubblie-channel-bubble-count">
+                      {ch.count || 0}
+                    </span>
                   </div>
-                  <span className="pubblie-channel-bubble-count">
-                    {ch.count || 0}
-                  </span>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
 
-            <div
-              className="pubblie-channel-bubble-col"
-              title="Gestisci o attiva canali"
-              onClick={onNavigateToChannels}
-              style={{ cursor: 'pointer' }}
-            >
-              <div className="pubblie-channel-bubble-circle add-btn">
-                <PlusIcon className="svg-icon-sm" />
+            {channels.length > 0 && (
+              <div
+                className="pubblie-channel-bubble-col"
+                title="Gestisci o attiva canali"
+                onClick={onNavigateToChannels}
+                style={{ cursor: 'pointer' }}
+              >
+                <div className="pubblie-channel-bubble-circle add-btn">
+                  <PlusIcon className="svg-icon-sm" />
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       )}

@@ -113,11 +113,28 @@ export default function ChannelsView({ channels, onToggleChannelStatus, onConnec
 
       {/* Channels Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '20px' }}>
-        {channels.map((ch) => {
-          const isAct = ch.active && ch.connected;
-          return (
-            <div
-              key={ch.id}
+        {channels.length === 0 ? (
+          <div style={{ background: '#ffffff', border: '1px dashed var(--border-grid)', borderRadius: '10px', padding: '48px 24px', textAlign: 'center', gridColumn: '1 / -1' }}>
+            <KeyIcon className="svg-icon-lg" style={{ color: 'var(--primary-granata)', marginBottom: '12px' }} />
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '6px' }}>Nessun canale collegato</h3>
+            <p style={{ fontSize: '0.86rem', color: 'var(--text-secondary)', maxWidth: '480px', margin: '0 auto 20px auto' }}>
+              Non ci sono ancora account social collegati. Clicca sul pulsante qui sotto per autorizzare il tuo primo canale su Facebook, Instagram, TikTok, LinkedIn, YouTube, Threads o Google Business.
+            </p>
+            <button
+              type="button"
+              onClick={() => setIsConnectModalOpen(true)}
+              className="composer-submit-btn"
+              style={{ padding: '9px 22px', borderRadius: '6px', fontSize: '0.84rem', fontWeight: 700 }}
+            >
+              Collega Canale Social
+            </button>
+          </div>
+        ) : (
+          channels.map((ch) => {
+            const isAct = ch.active && ch.connected;
+            return (
+              <div
+                key={ch.id}
               style={{
                 background: '#ffffff',
                 border: isAct ? '1px solid var(--border-grid)' : '1px dashed #cbd5e1',
@@ -262,7 +279,7 @@ export default function ChannelsView({ channels, onToggleChannelStatus, onConnec
               </div>
             </div>
           );
-        })}
+        }))}
       </div>
 
       {/* Modal Connetti Canale Social */}
