@@ -195,6 +195,16 @@ export default function Sidebar({
               <RefreshCwIcon className="svg-icon" />
               <span>Rinnovo canali</span>
             </div>
+
+            {/* Impostazioni Generali di Piattaforma */}
+            <div
+              className={`pubblie-nav-item ${activeView === 'settings' ? 'active' : ''}`}
+              onClick={() => setActiveView('settings')}
+              style={{ marginTop: '6px' }}
+            >
+              <SlidersIcon className="svg-icon" />
+              <span>Impostazioni</span>
+            </div>
           </>
         ) : (
           /* ========================================================
@@ -250,9 +260,14 @@ export default function Sidebar({
 
       {/* Sidebar Footer */}
       <div className="pubblie-sidebar-footer">
-        <div className="pubblie-footer-link" onClick={() => setActiveView('settings')}>
-          <HelpCircleIcon className="svg-icon-sm" />
-          <span>Guida & MCP</span>
+        <div
+          className={`pubblie-footer-link ${activeView === 'settings' ? 'active' : ''}`}
+          onClick={() => setActiveView('settings')}
+          style={{ cursor: 'pointer' }}
+          title="Impostazioni Piattaforma (Hub MCP, Storage pCloud, Docker Server)"
+        >
+          <SlidersIcon className="svg-icon-sm" />
+          <span>Impostazioni Piattaforma</span>
         </div>
       </div>
     </aside>

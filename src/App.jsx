@@ -248,14 +248,9 @@ export default function App() {
           />
         )}
 
-        {/* SETTINGS VIEW (Project, Channels, MCP Hub, AWS Media, Docker) */}
+        {/* GENERIC PLATFORM SETTINGS VIEW (MCP Hub, pCloud Media Storage, Docker Server) */}
         {activeView === 'settings' && (
           <SettingsView
-            currentProject={currentProject}
-            projects={projects}
-            onUpdateProject={handleUpdateProject}
-            channels={channels}
-            onToggleChannelStatus={handleToggleChannelStatus}
             toolsRegistry={MCP_TOOLS_REGISTRY}
             onAgentSchedulePost={handleSavePost}
           />

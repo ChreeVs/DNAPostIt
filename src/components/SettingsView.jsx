@@ -1,56 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
-  FolderIcon,
   SlidersIcon,
   ServerIcon,
   CheckIcon,
   BotIcon,
   SparklesIcon,
-  KeyIcon,
   DatabaseIcon,
-  ClockIcon,
-  RefreshIcon,
-  FacebookIcon,
-  InstagramIcon,
-  TikTokIcon,
-  YouTubeIcon,
-  LinkedInIcon,
-  ThreadsIcon,
-  GoogleBusinessIcon
+  RefreshIcon
 } from './Icons';
 
-export default function SettingsView({
-  currentProject,
-  projects,
-  onUpdateProject,
-  channels,
-  onToggleChannelStatus,
-  toolsRegistry,
-  onAgentSchedulePost
-}) {
-  const [activeTab, setActiveTab] = useState('project'); // 'project' | 'channels' | 'mcp' | 'aws' | 'server'
+export default function SettingsView({ toolsRegistry, onAgentSchedulePost }) {
+  const [activeTab, setActiveTab] = useState('mcp'); // 'mcp' | 'storage' | 'server'
 
-  // Project Form State
-  const [projName, setProjName] = useState(currentProject ? currentProject.name : '');
-  const [projSlug, setProjSlug] = useState(currentProject ? currentProject.slug : '');
-  const [projDesc, setProjDesc] = useState(currentProject ? currentProject.description : '');
-  const [projColor, setProjColor] = useState(currentProject ? currentProject.color : '#800020');
-  const [projTimezone, setProjTimezone] = useState('Europe/Rome (UTC+1)');
-  const [saveSuccess, setSaveSuccess] = useState(false);
+  // MCP Simulator & AI Provider State
+  const [simPrompt, setSimPrompt] = useState(
+    'Pianifica un post di lancio su Instagram e LinkedIn per il 29 Ottobre alle 15:30 con argomento Strategia Multi-Channel.'
+  );
+  const [isExecuting, setIsExecuting] = useState(false);
+  const [executionLog, setExecutionLog] = useState(null);
+  const [copiedField, setCopiedField] = useState(null);
 
-  useEffect(() => {
-    if (currentProject) {
-      setProjName(currentProject.name || '');
-      setProjSlug(currentProject.slug || '');
-      setProjDesc(currentProject.description || '');
-      setProjColor(currentProject.color || '#800020');
-    } else {
-      setProjName('');
-      setProjSlug('');
-      setProjDesc('');
-      setProjColor('#800020');
-    }
-  }, [currentProject]);
+  // AI Provider Keys
+  const [anthropicKey, setAnthropicKey] = useState('sk-ant-api03-prod-************************');
+  const [openaiKey, setOpenaiKey] = useState('sk-proj-prod-************************');
+  const [geminiKey, setGeminiKey] = useState('AIzaSy-prod-************************');
+  const [ollamaHost, setOllamaHost] = useState('http://localhost:11434');
+  const [saveAiSuccess, setSaveAiSuccess] = useState(false);
 
   // Media Storage State (pCloud / S3)
   const [storageProvider, setStorageProvider] = useState('pcloud'); // 'pcloud' | 's3'
@@ -60,6 +35,29 @@ export default function SettingsView({
   const [pcloudLinkMode, setPcloudLinkMode] = useState('direct'); // 'direct' | 'public_folder'
   const [isTestingPcloud, setIsTestingPcloud] = useState(false);
   const [pcloudTestResult, setPcloudTestResult] = useState(null);
+
+  // Docker Services State
+  const [serverActionStatus, setServerActionStatus] = useState(null);
+  const dockerServices = [
+    { name: 'caddy-proxy', role: "Reverse Proxy & Auto-SSL Let's Encrypt", port: '80/443', status: 'Running', uptime: '14 giorni' },
+    { name: 'postgres-db', role: 'Database Relazionale (PostgreSQL 16)', port: '5432', status: 'Running', uptime: '14 giorni' },
+    { name: 'redis-cache', role: 'Coda Code e Memoria Volatile (Redis 7)', port: '6379', status: 'Running', uptime: '14 giorni' },
+    { name: 'bullmq-worker', role: 'Motore di Schedulazione & Social Dispatcher', port: 'Internal', status: 'Running', uptime: '14 giorni' },
+    { name: 'media-ffmpeg', role: 'Transcodifica H.264 & Sharp Slicer', port: 'Internal', status: 'Running', uptime: '14 giorni' },
+    { name: 'mcp-server', role: 'Model Context Protocol Bridge (Stdio/SSE)', port: '3001', status: 'Running', uptime: '14 giorni' }
+  ];
+
+  const handleCopy = (text, fieldName) => {
+    navigator.clipboard?.writeText(text);
+    setCopiedField(fieldName);
+    setTimeout(() => setCopiedField(null), 2000);
+  };
+
+  const handleSaveAiKeys = (e) => {
+    e.preventDefault();
+    setSaveAiSuccess(true);
+    setTimeout(() => setSaveAiSuccess(false), 2500);
+  };
 
   const handleTestPCloud = () => {
     setIsTestingPcloud(true);
@@ -72,64 +70,10 @@ export default function SettingsView({
         totalQuota: '500 GB',
         usedQuota: '18.4 GB',
         freeQuota: '481.6 GB',
-        server: pcloudRegion.includes('eapi') ? 'Europa (Data Center UE)' : 'USA (Data Center US)',
-        message: 'Token valido. Permessi di lettura/scrittura e generazione link diretti CDN attivi.'
+        server: pcloudRegion.includes('eapi') ? 'Europa - Francoforte (eapi.pcloud.com)' : 'USA - Dallas (api.pcloud.com)',
+        message: 'Token verificato con successo. Permessi di lettura/scrittura e generazione link diretti CDN attivi.'
       });
-    }, 800);
-  };
-
-  // MCP Simulator State
-  const [simPrompt, setSimPrompt] = useState(
-    'Pianifica un post di lancio su Instagram e LinkedIn per il 29 Ottobre alle 15:30 con argomento Strategia Multi-Channel.'
-  );
-  const [isExecuting, setIsExecuting] = useState(false);
-  const [executionLog, setExecutionLog] = useState(null);
-
-  // Docker Services State
-  const dockerServices = [
-    { name: 'caddy-proxy', role: 'Reverse Proxy & Auto-SSL Let\'s Encrypt', port: '80/443', status: 'Running', uptime: '14 giorni' },
-    { name: 'postgres-db', role: 'Database Relazionale (PostgreSQL 16)', port: '5432', status: 'Running', uptime: '14 giorni' },
-    { name: 'redis-cache', role: 'Coda Code e Memoria Volatile', port: '6379', status: 'Running', uptime: '14 giorni' },
-    { name: 'bullmq-worker', role: 'Motore di Schedulazione & Social Dispatcher', port: 'Internal', status: 'Running', uptime: '14 giorni' },
-    { name: 'media-ffmpeg', role: 'Transcodifica H.264 & Sharp Slicer', port: 'Internal', status: 'Running', uptime: '14 giorni' },
-    { name: 'mcp-server', role: 'Model Context Protocol Bridge (Stdio/SSE)', port: '3001', status: 'Running', uptime: '14 giorni' }
-  ];
-
-  const availableColors = [
-    { label: 'Granata', value: '#800020' },
-    { label: 'Bordeaux', value: '#9e1b32' },
-    { label: 'Cremisi Scuro', value: '#630c1f' },
-    { label: 'Ardesia', value: '#334155' },
-    { label: 'Blu Notte', value: '#1e3a8a' },
-    { label: 'Smeraldo Scuro', value: '#064e3b' }
-  ];
-
-  const getPlatformIcon = (platform) => {
-    switch (platform) {
-      case 'instagram': return <InstagramIcon className="svg-icon-sm" />;
-      case 'facebook': return <FacebookIcon className="svg-icon-sm" />;
-      case 'linkedin': return <LinkedInIcon className="svg-icon-sm" />;
-      case 'tiktok': return <TikTokIcon className="svg-icon-sm" />;
-      case 'youtube': return <YouTubeIcon className="svg-icon-sm" />;
-      case 'threads': return <ThreadsIcon className="svg-icon-sm" />;
-      case 'gmb': return <GoogleBusinessIcon className="svg-icon-sm" />;
-      default: return null;
-    }
-  };
-
-  const handleSaveProjectSettings = (e) => {
-    e.preventDefault();
-    if (onUpdateProject && currentProject) {
-      onUpdateProject({
-        ...currentProject,
-        name: projName,
-        slug: projSlug,
-        description: projDesc,
-        color: projColor
-      });
-    }
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 2500);
+    }, 700);
   };
 
   const handleSimulateAgent = () => {
@@ -139,7 +83,7 @@ export default function SettingsView({
     setTimeout(() => {
       const generatedPost = {
         id: `post-mcp-${Date.now()}`,
-        projectId: currentProject ? currentProject.id : 'proj-1',
+        projectId: 'proj-default',
         channel: 'linkedin',
         platforms: ['linkedin', 'instagram'],
         content: "Annuncio Strategico: Potenziamento dell'infrastruttura editoriale e automazione distribuita con supporto Model Context Protocol (MCP).\n\nDistribuzione automatica sincronizzata sui canali ufficiali e monitoraggio in tempo reale.",
@@ -170,18 +114,29 @@ export default function SettingsView({
       });
 
       setIsExecuting(false);
+    }, 1100);
+  };
+
+  const handleServerAction = (actionName) => {
+    setServerActionStatus(`${actionName} in corso...`);
+    setTimeout(() => {
+      setServerActionStatus(`${actionName} completato con successo.`);
+      setTimeout(() => setServerActionStatus(null), 3000);
     }, 1200);
   };
 
   return (
     <div style={{ padding: '28px 36px', maxWidth: '1280px', margin: '0 auto', width: '100%' }}>
-      {/* Header */}
+      {/* Header Generico Piattaforma */}
       <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '4px', letterSpacing: '-0.02em' }}>
-          Impostazioni Piattaforma & Progetto
-        </h1>
-        <p style={{ fontSize: '0.86rem', color: 'var(--text-secondary)' }}>
-          Configura i parametri del progetto attivo, i canali social collegati, l'Hub MCP per agenti AI, lo storage AWS S3 e i container Docker.
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
+          <SlidersIcon className="svg-icon-lg" style={{ color: 'var(--primary-granata)' }} />
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-dark)', letterSpacing: '-0.02em', margin: 0 }}>
+            Impostazioni Piattaforma
+          </h1>
+        </div>
+        <p style={{ fontSize: '0.86rem', color: 'var(--text-secondary)', margin: 0 }}>
+          Configurazione globale del sistema indipendente dai singoli progetti: Hub Model Context Protocol (MCP) per agenti AI, storage multimediale su pCloud Drive e monitoraggio container Docker su server dedicato.
         </p>
       </div>
 
@@ -196,10 +151,8 @@ export default function SettingsView({
         }}
       >
         {[
-          { key: 'project', label: 'Progetto & Brand', icon: <FolderIcon className="svg-icon-sm" /> },
-          { key: 'channels', label: 'Canali Social', icon: <KeyIcon className="svg-icon-sm" /> },
           { key: 'mcp', label: 'Hub MCP & Integrazioni AI', icon: <BotIcon className="svg-icon-sm" /> },
-          { key: 'aws', label: 'Storage Media (pCloud)', icon: <DatabaseIcon className="svg-icon-sm" /> },
+          { key: 'storage', label: 'Storage Media (pCloud / S3)', icon: <DatabaseIcon className="svg-icon-sm" /> },
           { key: 'server', label: 'Server Dedicato & Docker', icon: <ServerIcon className="svg-icon-sm" /> }
         ].map((tab) => {
           const isActive = activeTab === tab.key;
@@ -230,254 +183,12 @@ export default function SettingsView({
         })}
       </div>
 
-      {/* TAB 1: PROGETTO & BRAND */}
-      {activeTab === 'project' && (
-        !currentProject ? (
-          <div style={{ background: '#ffffff', border: '1px dashed var(--border-grid)', borderRadius: '10px', padding: '48px 24px', textAlign: 'center' }}>
-            <FolderIcon className="svg-icon-lg" style={{ color: 'var(--primary-granata)', marginBottom: '12px' }} />
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '6px' }}>Nessun Progetto Selezionato</h3>
-            <p style={{ fontSize: '0.86rem', color: 'var(--text-secondary)', maxWidth: '440px', margin: '0 auto' }}>
-              Seleziona un progetto esistente oppure creane uno nuovo dalla sezione Progetti per gestirne impostazioni, colore distintivo e fuso orario.
-            </p>
-          </div>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
-          <div style={{ background: '#ffffff', border: '1px solid var(--border-grid)', borderRadius: '10px', padding: '24px', boxShadow: '0 1px 4px rgba(0,0,0,0.03)' }}>
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '18px' }}>
-              Dettagli Workspace Progetto
-            </h3>
-
-            <form onSubmit={handleSaveProjectSettings} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '6px' }}>
-                  NOME PROGETTO / BRAND
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={projName}
-                  onChange={(e) => setProjName(e.target.value)}
-                  className="date-input-dark"
-                  style={{ width: '100%', boxSizing: 'border-box' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '6px' }}>
-                  SLUG IDENTIFICATIVO
-                </label>
-                <input
-                  type="text"
-                  value={projSlug}
-                  onChange={(e) => setProjSlug(e.target.value)}
-                  className="date-input-dark"
-                  style={{ width: '100%', boxSizing: 'border-box', fontFamily: 'var(--font-mono)' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '6px' }}>
-                  DESCRIZIONE E LINEE GUIDA EDITORIALI
-                </label>
-                <textarea
-                  rows="3"
-                  value={projDesc}
-                  onChange={(e) => setProjDesc(e.target.value)}
-                  className="composer-textarea"
-                  style={{ width: '100%', boxSizing: 'border-box' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '8px' }}>
-                  COLORE DISTINTIVO BRAND
-                </label>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  {availableColors.map((col) => (
-                    <button
-                      key={col.value}
-                      type="button"
-                      onClick={() => setProjColor(col.value)}
-                      style={{
-                        width: '32px',
-                        height: '32px',
-                        borderRadius: '8px',
-                        backgroundColor: col.value,
-                        border: projColor === col.value ? '3px solid #111827' : '1px solid rgba(0,0,0,0.1)',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: '#ffffff'
-                      }}
-                      title={col.label}
-                    >
-                      {projColor === col.value && <CheckIcon className="svg-icon-mini" />}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '6px' }}>
-                  FUSO ORARIO DI PUBBLICAZIONE
-                </label>
-                <input
-                  type="text"
-                  value={projTimezone}
-                  onChange={(e) => setProjTimezone(e.target.value)}
-                  className="date-input-dark"
-                  style={{ width: '100%', boxSizing: 'border-box' }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingTop: '10px' }}>
-                <button
-                  type="submit"
-                  className="composer-submit-btn"
-                  style={{ padding: '9px 24px', borderRadius: '6px', fontSize: '0.84rem', fontWeight: 700 }}
-                >
-                  Salva Modifiche Progetto
-                </button>
-                {saveSuccess && (
-                  <span style={{ color: 'var(--feed-green)', fontSize: '0.82rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                    <CheckIcon className="svg-icon-mini" /> Salvato con successo!
-                  </span>
-                )}
-              </div>
-            </form>
-          </div>
-
-          {/* Quick Project Summary */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-            <div style={{ background: '#ffffff', border: '1px solid var(--border-grid)', borderRadius: '10px', padding: '20px', boxShadow: '0 1px 4px rgba(0,0,0,0.03)' }}>
-              <h4 style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '12px' }}>
-                Progetto Selezionato
-              </h4>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
-                <div
-                  style={{
-                    width: '44px',
-                    height: '44px',
-                    borderRadius: '8px',
-                    backgroundColor: projColor,
-                    color: '#ffffff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 800,
-                    fontSize: '1rem'
-                  }}
-                >
-                  {projName.slice(0, 3).toUpperCase()}
-                </div>
-                <div>
-                  <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-dark)' }}>{projName}</div>
-                  <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>/{projSlug}</div>
-                </div>
-              </div>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
-                Tutti i post programmati e i canali configurati appartengono a questo workspace isolato.
-              </p>
-            </div>
-          </div>
-        </div>
-        )
-      )}
-
-      {/* TAB 2: CANALI SOCIAL */}
-      {activeTab === 'channels' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-          <div style={{ background: '#ffffff', border: '1px solid var(--border-grid)', borderRadius: '10px', padding: '24px', boxShadow: '0 1px 4px rgba(0,0,0,0.03)' }}>
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '8px' }}>
-              Attivazione Canali per il Progetto
-            </h3>
-            <p style={{ fontSize: '0.84rem', color: 'var(--text-secondary)', marginBottom: '20px' }}>
-              Attiva o disattiva istantaneamente i canali social. I canali attivi compariranno nella barra superiore del calendario e nel compositore post.
-            </p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {channels.map((ch) => {
-                const isAct = ch.active && ch.connected;
-                return (
-                  <div
-                    key={ch.id}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '14px 18px',
-                      background: '#f8fafc',
-                      borderRadius: '8px',
-                      border: '1px solid var(--border-grid)'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div
-                        style={{
-                          width: '36px',
-                          height: '36px',
-                          borderRadius: '8px',
-                          backgroundColor: `${ch.color}15`,
-                          color: ch.color,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          border: `1px solid ${ch.color}33`
-                        }}
-                      >
-                        {getPlatformIcon(ch.platform)}
-                      </div>
-                      <div>
-                        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-dark)' }}>{ch.name}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-                          {ch.handle || 'Account non specificato'}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                      <span style={{ fontSize: '0.78rem', color: ch.connected ? 'var(--feed-green)' : '#94a3b8', fontWeight: 600 }}>
-                        {ch.connected ? 'Token Valido' : 'Non Connesso'}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => onToggleChannelStatus && onToggleChannelStatus(ch.id)}
-                        style={{
-                          background: isAct ? 'var(--primary-granata)' : '#e2e8f0',
-                          color: isAct ? '#ffffff' : '#64748b',
-                          border: 'none',
-                          padding: '6px 14px',
-                          borderRadius: '16px',
-                          fontSize: '0.75rem',
-                          fontWeight: 700,
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px'
-                        }}
-                      >
-                        {isAct ? (
-                          <>
-                            <CheckIcon className="svg-icon-mini" /> ABILITATO
-                          </>
-                        ) : (
-                          'DISABILITATO'
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* TAB 3: HUB MCP & INTEGRAZIONI AI */}
+      {/* ========================================================
+          TAB 1: HUB MCP & INTEGRAZIONI AI
+          ======================================================== */}
       {activeTab === 'mcp' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {/* MCP Server Info */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+          {/* MCP Server Info Card */}
           <div style={{ background: '#ffffff', border: '1px solid var(--border-grid)', borderRadius: '10px', padding: '24px', boxShadow: '0 1px 4px rgba(0,0,0,0.03)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -487,7 +198,7 @@ export default function SettingsView({
                     Model Context Protocol (MCP) Server
                   </h3>
                   <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                    Standard di connessione ufficiale Anthropic / Model Context Protocol per agenti AI
+                    Ponte ufficiale per consentire agli agenti AI (Claude Desktop, Cursor, Antigravity, LLM locali) di leggere calendari e pubblicare post
                   </div>
                 </div>
               </div>
@@ -497,28 +208,46 @@ export default function SettingsView({
               </span>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '20px' }}>
-              <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: '8px', border: '1px solid var(--border-grid)' }}>
-                <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                  ENDPOINT SSE (SERVER-SENT EVENTS)
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '22px' }}>
+              <div style={{ background: '#f8fafc', padding: '14px 18px', borderRadius: '8px', border: '1px solid var(--border-grid)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                    ENDPOINT SSE (SERVER-SENT EVENTS)
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy('http://localhost:3001/mcp/sse', 'sse')}
+                    style={{ background: 'none', border: 'none', color: 'var(--primary-granata)', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}
+                  >
+                    {copiedField === 'sse' ? 'Copiato!' : 'Copia'}
+                  </button>
                 </div>
-                <div style={{ fontSize: '0.85rem', fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--primary-granata)', marginTop: '4px' }}>
+                <div style={{ fontSize: '0.88rem', fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--primary-granata)', marginTop: '4px' }}>
                   http://localhost:3001/mcp/sse
                 </div>
               </div>
 
-              <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: '8px', border: '1px solid var(--border-grid)' }}>
-                <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                  TRASPORTO STDIO PER DESKTOP CLIENTS
+              <div style={{ background: '#f8fafc', padding: '14px 18px', borderRadius: '8px', border: '1px solid var(--border-grid)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                    TRASPORTO STDIO (PER CLAUDE DESKTOP & CURSOR)
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy('node server/dist/mcp/mcpServer.js', 'stdio')}
+                    style={{ background: 'none', border: 'none', color: 'var(--primary-granata)', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}
+                  >
+                    {copiedField === 'stdio' ? 'Copiato!' : 'Copia'}
+                  </button>
                 </div>
-                <div style={{ fontSize: '0.85rem', fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--text-dark)', marginTop: '4px' }}>
+                <div style={{ fontSize: '0.88rem', fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--text-dark)', marginTop: '4px' }}>
                   node server/dist/mcp/mcpServer.js
                 </div>
               </div>
             </div>
 
             {/* Tools Registry */}
-            <div style={{ marginBottom: '20px' }}>
+            <div style={{ marginBottom: '22px' }}>
               <h4 style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '10px' }}>
                 Tool MCP Registrati ed Esposti agli Agenti:
               </h4>
@@ -543,7 +272,7 @@ export default function SettingsView({
               </div>
             </div>
 
-            {/* Simulator Box */}
+            {/* Interactive Simulator Box */}
             <div style={{ borderTop: '1px solid var(--border-grid)', paddingTop: '18px' }}>
               <h4 style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <SparklesIcon className="svg-icon" style={{ color: 'var(--primary-granata)' }} />
@@ -576,17 +305,98 @@ export default function SettingsView({
                   <div>Record creato: {executionLog.response.database_record}</div>
                   <div>BullMQ Job ID: {executionLog.response.job_id}</div>
                   <div style={{ color: '#94a3b8', marginTop: '4px' }}>
-                    Post inserito con successo nel calendario del progetto attivo.
+                    Istruzione agentica elaborata ed eseguita via protocollo JSON-RPC 2.0.
                   </div>
                 </div>
               )}
             </div>
           </div>
+
+          {/* AI Providers Keys Configuration */}
+          <div style={{ background: '#ffffff', border: '1px solid var(--border-grid)', borderRadius: '10px', padding: '24px', boxShadow: '0 1px 4px rgba(0,0,0,0.03)' }}>
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '6px' }}>
+              Chiavi API Provider AI (Anthropic, OpenAI, Gemini, Ollama)
+            </h3>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '18px' }}>
+              Configura i token per i modelli linguistici utilizzati per la scrittura assistita, riformulazione post e generazione hashtag.
+            </p>
+
+            <form onSubmit={handleSaveAiKeys} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '6px' }}>
+                  ANTHROPIC CLAUDE API KEY (CLAUDE 3.5 SONNET)
+                </label>
+                <input
+                  type="password"
+                  value={anthropicKey}
+                  onChange={(e) => setAnthropicKey(e.target.value)}
+                  className="date-input-dark"
+                  style={{ width: '100%', boxSizing: 'border-box', fontFamily: 'var(--font-mono)' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '6px' }}>
+                  OPENAI API KEY (GPT-4O / GPT-4O-MINI)
+                </label>
+                <input
+                  type="password"
+                  value={openaiKey}
+                  onChange={(e) => setOpenaiKey(e.target.value)}
+                  className="date-input-dark"
+                  style={{ width: '100%', boxSizing: 'border-box', fontFamily: 'var(--font-mono)' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '6px' }}>
+                  GOOGLE GEMINI API KEY (GEMINI 2.0 FLASH)
+                </label>
+                <input
+                  type="password"
+                  value={geminiKey}
+                  onChange={(e) => setGeminiKey(e.target.value)}
+                  className="date-input-dark"
+                  style={{ width: '100%', boxSizing: 'border-box', fontFamily: 'var(--font-mono)' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '6px' }}>
+                  OLLAMA LOCAL HOST (PER MODELLI LOCALI LLAMA/MISTRAL)
+                </label>
+                <input
+                  type="text"
+                  value={ollamaHost}
+                  onChange={(e) => setOllamaHost(e.target.value)}
+                  className="date-input-dark"
+                  style={{ width: '100%', boxSizing: 'border-box', fontFamily: 'var(--font-mono)' }}
+                />
+              </div>
+
+              <div style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', gap: '12px', paddingTop: '6px' }}>
+                <button
+                  type="submit"
+                  className="composer-submit-btn"
+                  style={{ padding: '8px 22px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 700 }}
+                >
+                  Salva Configurazioni AI
+                </button>
+                {saveAiSuccess && (
+                  <span style={{ color: 'var(--feed-green)', fontSize: '0.82rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <CheckIcon className="svg-icon-mini" /> Chiavi salvate con successo nel server.
+                  </span>
+                )}
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
-      {/* TAB 4: PCLOUD MEDIA STORAGE */}
-      {activeTab === 'aws' && (
+      {/* ========================================================
+          TAB 2: STORAGE MEDIA (PCLOUD DRIVE / S3)
+          ======================================================== */}
+      {activeTab === 'storage' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ background: '#ffffff', border: '1px solid var(--border-grid)', borderRadius: '10px', padding: '24px', boxShadow: '0 1px 4px rgba(0,0,0,0.03)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
@@ -595,7 +405,7 @@ export default function SettingsView({
                   Storage Multimediale: pCloud Drive
                 </h3>
                 <p style={{ fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
-                  Sostituisce completamente AWS S3 azzerando i costi di banda. I caroselli, foto e video (Reels/TikTok/Shorts) vengono caricati sulla tua app pCloud e distribuiti via link diretti CDN.
+                  Sostituisce completamente AWS S3 azzerando i costi di banda. I caroselli, foto e video vengono caricati sulla tua app pCloud e distribuiti ai social via link diretti CDN.
                 </p>
               </div>
 
@@ -686,7 +496,7 @@ export default function SettingsView({
                       style={{ width: '100%', boxSizing: 'border-box', fontFamily: 'var(--font-mono)' }}
                     />
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>
-                      Verrà creata automaticamente nella radice della tua app pCloud.
+                      Viene creata automaticamente nella radice della tua app pCloud.
                     </span>
                   </div>
 
@@ -803,54 +613,144 @@ export default function SettingsView({
         </div>
       )}
 
-      {/* TAB 5: SERVER DEDICATO & DOCKER */}
+      {/* ========================================================
+          TAB 3: SERVER DEDICATO & DOCKER
+          ======================================================== */}
       {activeTab === 'server' && (
-        <div style={{ background: '#ffffff', border: '1px solid var(--border-grid)', borderRadius: '10px', padding: '24px', boxShadow: '0 1px 4px rgba(0,0,0,0.03)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <ServerIcon className="svg-icon" style={{ color: 'var(--primary-granata)' }} />
-              Container Docker Attivi sul Server Dedicato
-            </h3>
-            <span style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', color: 'var(--feed-green)', fontWeight: 700 }}>
-              DOCKER COMPOSE V2 ACTIVE
-            </span>
-          </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div style={{ background: '#ffffff', border: '1px solid var(--border-grid)', borderRadius: '10px', padding: '24px', boxShadow: '0 1px 4px rgba(0,0,0,0.03)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <div>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                  <ServerIcon className="svg-icon" style={{ color: 'var(--primary-granata)' }} />
+                  Container Docker Attivi sul Server Dedicato
+                </h3>
+                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                  Infrastruttura containerizzata orchestrata con Docker Compose e proxy Caddy con rinnovo automatico certificati SSL
+                </div>
+              </div>
+              <span style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', color: 'var(--feed-green)', fontWeight: 700, background: '#dcfce7', padding: '4px 10px', borderRadius: '12px' }}>
+                DOCKER COMPOSE V2 ACTIVE
+              </span>
+            </div>
 
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--border-grid)', textAlign: 'left', color: 'var(--text-secondary)', background: '#f8fafc' }}>
-                  <th style={{ padding: '10px 12px' }}>CONTAINER</th>
-                  <th style={{ padding: '10px 12px' }}>RUOLO / FUNZIONE</th>
-                  <th style={{ padding: '10px 12px' }}>PORTA</th>
-                  <th style={{ padding: '10px 12px' }}>STATO</th>
-                  <th style={{ padding: '10px 12px' }}>UPTIME</th>
-                </tr>
-              </thead>
-              <tbody>
-                {dockerServices.map((srv) => (
-                  <tr key={srv.name} style={{ borderBottom: '1px solid var(--border-grid)' }}>
-                    <td style={{ padding: '12px', fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--text-dark)' }}>
-                      {srv.name}
-                    </td>
-                    <td style={{ padding: '12px', color: 'var(--text-secondary)' }}>
-                      {srv.role}
-                    </td>
-                    <td style={{ padding: '12px', fontFamily: 'var(--font-mono)', color: 'var(--primary-granata)', fontWeight: 600 }}>
-                      {srv.port}
-                    </td>
-                    <td style={{ padding: '12px' }}>
-                      <span style={{ color: 'var(--feed-green)', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 700, background: '#dcfce7', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>
-                        <CheckIcon className="svg-icon-mini" /> {srv.status}
-                      </span>
-                    </td>
-                    <td style={{ padding: '12px', color: 'var(--text-muted)' }}>
-                      {srv.uptime}
-                    </td>
+            {/* Hardware Metrics Summary */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '20px' }}>
+              <div style={{ background: '#f8fafc', padding: '12px 14px', borderRadius: '8px', border: '1px solid var(--border-grid)' }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>UTILIZZO CPU</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)' }}>14%</div>
+              </div>
+              <div style={{ background: '#f8fafc', padding: '12px 14px', borderRadius: '8px', border: '1px solid var(--border-grid)' }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>MEMORIA RAM</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)' }}>3.4 / 16 GB</div>
+              </div>
+              <div style={{ background: '#f8fafc', padding: '12px 14px', borderRadius: '8px', border: '1px solid var(--border-grid)' }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>DISCO VOLUMI DOCKER</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)' }}>22.8 / 250 GB</div>
+              </div>
+              <div style={{ background: '#f8fafc', padding: '12px 14px', borderRadius: '8px', border: '1px solid var(--border-grid)' }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>SISTEMA OPERATIVO</div>
+                <div style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--primary-granata)' }}>Ubuntu 24.04 LTS</div>
+              </div>
+            </div>
+
+            {/* Container Table */}
+            <div style={{ overflowX: 'auto', marginBottom: '20px' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid var(--border-grid)', textAlign: 'left', color: 'var(--text-secondary)', background: '#f8fafc' }}>
+                    <th style={{ padding: '10px 12px' }}>CONTAINER</th>
+                    <th style={{ padding: '10px 12px' }}>RUOLO / FUNZIONE</th>
+                    <th style={{ padding: '10px 12px' }}>PORTA</th>
+                    <th style={{ padding: '10px 12px' }}>STATO</th>
+                    <th style={{ padding: '10px 12px' }}>UPTIME</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {dockerServices.map((srv) => (
+                    <tr key={srv.name} style={{ borderBottom: '1px solid var(--border-grid)' }}>
+                      <td style={{ padding: '12px', fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--text-dark)' }}>
+                        {srv.name}
+                      </td>
+                      <td style={{ padding: '12px', color: 'var(--text-secondary)' }}>
+                        {srv.role}
+                      </td>
+                      <td style={{ padding: '12px', fontFamily: 'var(--font-mono)', color: 'var(--primary-granata)', fontWeight: 600 }}>
+                        {srv.port}
+                      </td>
+                      <td style={{ padding: '12px' }}>
+                        <span style={{ color: 'var(--feed-green)', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 700, background: '#dcfce7', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>
+                          <CheckIcon className="svg-icon-mini" /> {srv.status}
+                        </span>
+                      </td>
+                      <td style={{ padding: '12px', color: 'var(--text-muted)' }}>
+                        {srv.uptime}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Quick Server Maintenance Actions */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--border-grid)', paddingTop: '16px' }}>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => handleServerAction('Riavvio container')}
+                  style={{
+                    padding: '7px 14px',
+                    borderRadius: '6px',
+                    border: '1px solid var(--border-grid)',
+                    background: '#ffffff',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    color: 'var(--text-dark)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Riavvia Container
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleServerAction('Svuotamento cache Redis')}
+                  style={{
+                    padding: '7px 14px',
+                    borderRadius: '6px',
+                    border: '1px solid var(--border-grid)',
+                    background: '#ffffff',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    color: 'var(--text-dark)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Svuota Cache Redis
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleServerAction('Verifica certificato Caddy SSL')}
+                  style={{
+                    padding: '7px 14px',
+                    borderRadius: '6px',
+                    border: '1px solid var(--border-grid)',
+                    background: '#ffffff',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    color: 'var(--text-dark)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Verifica Certificato SSL
+                </button>
+              </div>
+
+              {serverActionStatus && (
+                <span style={{ color: 'var(--feed-green)', fontSize: '0.8rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <CheckIcon className="svg-icon-mini" /> {serverActionStatus}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       )}
