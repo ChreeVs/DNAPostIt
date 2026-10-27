@@ -3,7 +3,7 @@ import React from 'react';
 // Pubblie speech bubble logo
 export const PubblieLogo = ({ className = "svg-icon" }) => (
   <svg className={className} viewBox="0 0 36 36" fill="none">
-    <rect width="36" height="36" rx="10" fill="url(#violet-grad)" />
+    <rect width="36" height="36" rx="10" fill="url(#granata-grad)" />
     <path
       d="M18 9C13.03 9 9 13.03 9 18C9 20.12 9.74 22.07 10.97 23.61L9.5 27L13.1 25.68C14.54 26.52 16.21 27 18 27C22.97 27 27 22.97 27 18C27 13.03 22.97 9 18 9Z"
       stroke="#ffffff"
@@ -13,9 +13,9 @@ export const PubblieLogo = ({ className = "svg-icon" }) => (
     />
     <circle cx="18" cy="18" r="3.5" fill="#ffffff" />
     <defs>
-      <linearGradient id="violet-grad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
-        <stop stopColor="#8b5cf6" />
-        <stop stopColor="#6d28d9" />
+      <linearGradient id="granata-grad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#9b1b30" />
+        <stop stopColor="#630c1f" />
       </linearGradient>
     </defs>
   </svg>

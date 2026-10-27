@@ -40,7 +40,7 @@ export default function ChannelsView({ channels }) {
   return (
     <div className="page-container">
       <div style={{ marginBottom: '24px' }}>
-        <h2 style={{ fontSize: '1.25rem', marginBottom: '6px' }}>Canali Social Collegati</h2>
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '6px' }}>Canali Social Collegati</h2>
         <p style={{ fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
           Monitoraggio OAuth2, validità dei token di accesso e sincronizzazione delle autorizzazioni per tutti i 7 canali.
         </p>
@@ -88,17 +88,17 @@ export default function ChannelsView({ channels }) {
               </span>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', background: 'var(--bg-surface)', padding: '12px', borderRadius: 'var(--radius-md)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', background: 'var(--bg-surface-subtle)', padding: '12px', borderRadius: 'var(--radius-md)' }}>
               <div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Audience / Follower</div>
-                <div style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-white)' }}>
-                  {ch.followers}
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Audience / Follower</div>
+                <div style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-dark)' }}>
+                  {ch.count || ch.followers || 0}
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Validità Token OAuth2</div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary-neon)' }}>
-                  {ch.tokenExpiresDays} giorni
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Validità Token OAuth2</div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary-granata)' }}>
+                  {ch.tokenExpiresDays || 60} giorni
                 </div>
               </div>
             </div>
