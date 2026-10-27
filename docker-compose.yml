@@ -81,11 +81,15 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-secure_redis_pwd_2026}
-      AWS_REGION: ${AWS_REGION}
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-      AWS_S3_BUCKET: ${AWS_S3_BUCKET}
-      AWS_CLOUDFRONT_DOMAIN: ${AWS_CLOUDFRONT_DOMAIN}
+      MEDIA_STORAGE_PROVIDER: ${MEDIA_STORAGE_PROVIDER:-pcloud}
+      PCLOUD_ACCESS_TOKEN: ${PCLOUD_ACCESS_TOKEN:-}
+      PCLOUD_API_HOST: ${PCLOUD_API_HOST:-https://eapi.pcloud.com}
+      PCLOUD_FOLDER_NAME: ${PCLOUD_FOLDER_NAME:-DNAPostIt_Media}
+      AWS_REGION: ${AWS_REGION:-eu-central-1}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET:-}
+      AWS_CLOUDFRONT_DOMAIN: ${AWS_CLOUDFRONT_DOMAIN:-}
       JWT_SECRET: ${JWT_SECRET:-super_secret_jwt_key_dnapostit}
     depends_on:
       postgres:
@@ -108,6 +112,12 @@ services:
       NODE_ENV: production
       DATABASE_URL: postgresql://${DB_USER:-dnapostit}:${DB_PASSWORD:-secure_dnapostit_password_2026}@postgres:5432/${DB_NAME:-dnapostit_db}?schema=public
       REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-secure_redis_pwd_2026}
+      MEDIA_STORAGE_PROVIDER: ${MEDIA_STORAGE_PROVIDER:-pcloud}
+      PCLOUD_ACCESS_TOKEN: ${PCLOUD_ACCESS_TOKEN:-}
+      PCLOUD_API_HOST: ${PCLOUD_API_HOST:-https://eapi.pcloud.com}
+      PCLOUD_FOLDER_NAME: ${PCLOUD_FOLDER_NAME:-DNAPostIt_Media}
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-secure_redis_pwd_2026}
       AWS_REGION: ${AWS_REGION}

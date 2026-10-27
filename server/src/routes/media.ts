@@ -1,42 +1,67 @@
 import { Router } from 'express';
+import { PCloudMediaService } from '../services/pCloudService.js';
 import { S3MediaService } from '../services/s3Service.js';
 import multer from 'multer';
 
 export const mediaRouter = Router();
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 100 * 1024 * 1024 } });
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 250 * 1024 * 1024 } }); // 250MB for video/reels
 
-// Generate pre-signed S3 upload URL for client direct uploads
-mediaRouter.post('/presign', async (req, res) => {
+/**
+ * Test pCloud OAuth token and fetch storage quota
+ */
+mediaRouter.post('/pcloud/test', async (req, res) => {
   try {
-    const { filename, mimeType } = req.body;
-    if (!filename || !mimeType) {
-      return res.status(400).json({ success: false, error: 'filename and mimeType are required' });
-    }
-
-    const result = await S3MediaService.getPresignedUploadUrl(filename, mimeType);
-    res.json({ success: true, data: result });
+    const { token } = req.body;
+    const info = await PCloudMediaService.testConnection(token);
+    res.json({ success: true, data: info });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(400).json({ success: false, error: err.message });
   }
 });
 
-// Direct upload to server which streams to S3
+/**
+ * Direct upload to server which saves to pCloud (default) or S3
+ */
 mediaRouter.post('/upload', upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ success: false, error: 'No file uploaded' });
+      return res.status(400).json({ success: false, error: 'Nessun file caricato' });
     }
 
-    const key = `uploads/${Date.now()}-${req.file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-    const cdnUrl = await S3MediaService.uploadBuffer(req.file.buffer, key, req.file.mimetype);
+    const provider = process.env.MEDIA_STORAGE_PROVIDER || 'pcloud';
+
+    if (provider === 's3') {
+      const key = `uploads/${Date.now()}-${req.file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+      const cdnUrl = await S3MediaService.uploadBuffer(req.file.buffer, key, req.file.mimetype);
+
+      return res.json({
+        success: true,
+        data: {
+          provider: 's3',
+          key,
+          url: cdnUrl,
+          size: req.file.size,
+          mimeType: req.file.mimetype
+        }
+      });
+    }
+
+    // Default: pCloud upload with direct CDN link
+    const result = await PCloudMediaService.uploadBuffer(
+      req.file.buffer,
+      req.file.originalname,
+      req.file.mimetype
+    );
 
     res.json({
       success: true,
       data: {
-        key,
-        cdnUrl,
-        size: req.file.size,
-        mimeType: req.file.mimetype
+        provider: 'pcloud',
+        fileId: result.fileId,
+        filename: result.filename,
+        url: result.directUrl,
+        size: result.size,
+        mimeType: result.mimeType
       }
     });
   } catch (err: any) {

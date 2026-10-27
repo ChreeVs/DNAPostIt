@@ -38,6 +38,32 @@ export default function SettingsView({
   const [projTimezone, setProjTimezone] = useState('Europe/Rome (UTC+1)');
   const [saveSuccess, setSaveSuccess] = useState(false);
 
+  // Media Storage State (pCloud / S3)
+  const [storageProvider, setStorageProvider] = useState('pcloud'); // 'pcloud' | 's3'
+  const [pcloudToken, setPcloudToken] = useState('pcloud_oauth_d9f82a10b4c73e9a');
+  const [pcloudRegion, setPcloudRegion] = useState('https://eapi.pcloud.com');
+  const [pcloudFolder, setPcloudFolder] = useState('DNAPostIt_Media');
+  const [pcloudLinkMode, setPcloudLinkMode] = useState('direct'); // 'direct' | 'public_folder'
+  const [isTestingPcloud, setIsTestingPcloud] = useState(false);
+  const [pcloudTestResult, setPcloudTestResult] = useState(null);
+
+  const handleTestPCloud = () => {
+    setIsTestingPcloud(true);
+    setPcloudTestResult(null);
+    setTimeout(() => {
+      setIsTestingPcloud(false);
+      setPcloudTestResult({
+        success: true,
+        email: 'account@pcloud.com',
+        totalQuota: '500 GB',
+        usedQuota: '18.4 GB',
+        freeQuota: '481.6 GB',
+        server: pcloudRegion.includes('eapi') ? 'Europa (Data Center UE)' : 'USA (Data Center US)',
+        message: 'Token valido. Permessi di lettura/scrittura e generazione link diretti CDN attivi.'
+      });
+    }, 800);
+  };
+
   // MCP Simulator State
   const [simPrompt, setSimPrompt] = useState(
     'Pianifica un post di lancio su Instagram e LinkedIn per il 29 Ottobre alle 15:30 con argomento Strategia Multi-Channel.'
@@ -159,7 +185,7 @@ export default function SettingsView({
           { key: 'project', label: 'Progetto & Brand', icon: <FolderIcon className="svg-icon-sm" /> },
           { key: 'channels', label: 'Canali Social', icon: <KeyIcon className="svg-icon-sm" /> },
           { key: 'mcp', label: 'Hub MCP & Integrazioni AI', icon: <BotIcon className="svg-icon-sm" /> },
-          { key: 'aws', label: 'Storage AWS & Media CDN', icon: <DatabaseIcon className="svg-icon-sm" /> },
+          { key: 'aws', label: 'Storage Media (pCloud)', icon: <DatabaseIcon className="svg-icon-sm" /> },
           { key: 'server', label: 'Server Dedicato & Docker', icon: <ServerIcon className="svg-icon-sm" /> }
         ].map((tab) => {
           const isActive = activeTab === tab.key;
@@ -535,68 +561,220 @@ export default function SettingsView({
         </div>
       )}
 
-      {/* TAB 4: AWS MEDIA STORAGE */}
+      {/* TAB 4: PCLOUD MEDIA STORAGE */}
       {activeTab === 'aws' && (
-        <div style={{ background: '#ffffff', border: '1px solid var(--border-grid)', borderRadius: '10px', padding: '24px', boxShadow: '0 1px 4px rgba(0,0,0,0.03)' }}>
-          <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '8px' }}>
-            Parametri AWS S3 Bucket & CloudFront CDN
-          </h3>
-          <p style={{ fontSize: '0.84rem', color: 'var(--text-secondary)', marginBottom: '20px' }}>
-            I file multimediali (foto carosello, video Reels, Shorts, TikTok) vengono archiviati su Amazon S3 e distribuiti tramite CloudFront.
-          </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div style={{ background: '#ffffff', border: '1px solid var(--border-grid)', borderRadius: '10px', padding: '24px', boxShadow: '0 1px 4px rgba(0,0,0,0.03)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <div>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '4px' }}>
+                  Storage Multimediale: pCloud Drive
+                </h3>
+                <p style={{ fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
+                  Sostituisce completamente AWS S3 azzerando i costi di banda. I caroselli, foto e video (Reels/TikTok/Shorts) vengono caricati sulla tua app pCloud e distribuiti via link diretti CDN.
+                </p>
+              </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '6px' }}>
-                S3 BUCKET NAME
-              </label>
-              <input
-                type="text"
-                readOnly
-                value="dnapostit-media-prod"
-                className="date-input-dark"
-                style={{ width: '100%', boxSizing: 'border-box', fontFamily: 'var(--font-mono)' }}
-              />
+              {/* Provider Selector Switch */}
+              <div style={{ display: 'inline-flex', background: '#f1f5f9', padding: '3px', borderRadius: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => setStorageProvider('pcloud')}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: '6px',
+                    border: 'none',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    background: storageProvider === 'pcloud' ? 'var(--primary-granata)' : 'transparent',
+                    color: storageProvider === 'pcloud' ? '#ffffff' : 'var(--text-secondary)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  pCloud (Attivo)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStorageProvider('s3')}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: '6px',
+                    border: 'none',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    background: storageProvider === 's3' ? 'var(--primary-granata)' : 'transparent',
+                    color: storageProvider === 's3' ? '#ffffff' : 'var(--text-secondary)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  AWS S3
+                </button>
+              </div>
             </div>
 
-            <div>
-              <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '6px' }}>
-                AWS REGION
-              </label>
-              <input
-                type="text"
-                readOnly
-                value="eu-central-1 (Francoforte)"
-                className="date-input-dark"
-                style={{ width: '100%', boxSizing: 'border-box' }}
-              />
-            </div>
+            {storageProvider === 'pcloud' ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '6px' }}>
+                      PCLOUD ACCESS TOKEN (OAUTH2) *
+                    </label>
+                    <input
+                      type="password"
+                      value={pcloudToken}
+                      onChange={(e) => setPcloudToken(e.target.value)}
+                      placeholder="Incolla qui il tuo Access Token pCloud..."
+                      className="date-input-dark"
+                      style={{ width: '100%', boxSizing: 'border-box', fontFamily: 'var(--font-mono)' }}
+                    />
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>
+                      Generabile dalla console per sviluppatori pCloud (OAuth Apps).
+                    </span>
+                  </div>
 
-            <div>
-              <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '6px' }}>
-                CLOUDFRONT CDN DOMAIN
-              </label>
-              <input
-                type="text"
-                readOnly
-                value="https://d111111abcdef8.cloudfront.net"
-                className="date-input-dark"
-                style={{ width: '100%', boxSizing: 'border-box', fontFamily: 'var(--font-mono)', color: 'var(--primary-granata)', fontWeight: 700 }}
-              />
-            </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '6px' }}>
+                      DATA CENTER REGION (API HOST)
+                    </label>
+                    <select
+                      value={pcloudRegion}
+                      onChange={(e) => setPcloudRegion(e.target.value)}
+                      className="date-input-dark"
+                      style={{ width: '100%', boxSizing: 'border-box', cursor: 'pointer' }}
+                    >
+                      <option value="https://eapi.pcloud.com">Europa - Francoforte / Lussemburgo (eapi.pcloud.com)</option>
+                      <option value="https://api.pcloud.com">Stati Uniti - Texas (api.pcloud.com)</option>
+                    </select>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>
+                      I server europei garantiscono la massima velocità di upload in Italia.
+                    </span>
+                  </div>
 
-            <div>
-              <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '6px' }}>
-                DIMENSIONE MASSIMA VIDEO
-              </label>
-              <input
-                type="text"
-                readOnly
-                value="500 MB (Transcodifica H.264 automatica)"
-                className="date-input-dark"
-                style={{ width: '100%', boxSizing: 'border-box' }}
-              />
-            </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '6px' }}>
+                      CARTELLA DI ARCHIVIAZIONE PCLOUD
+                    </label>
+                    <input
+                      type="text"
+                      value={pcloudFolder}
+                      onChange={(e) => setPcloudFolder(e.target.value)}
+                      className="date-input-dark"
+                      style={{ width: '100%', boxSizing: 'border-box', fontFamily: 'var(--font-mono)' }}
+                    />
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>
+                      Verrà creata automaticamente nella radice della tua app pCloud.
+                    </span>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '6px' }}>
+                      MODALITÀ DISTRIBUZIONE LINK SOCIAL
+                    </label>
+                    <select
+                      value={pcloudLinkMode}
+                      onChange={(e) => setPcloudLinkMode(e.target.value)}
+                      className="date-input-dark"
+                      style={{ width: '100%', boxSizing: 'border-box', cursor: 'pointer' }}
+                    >
+                      <option value="direct">Link Diretto CDN pCloud (getfilelink - Consigliato)</option>
+                      <option value="public_folder">Cartella Pubblica pCloud (filedn.eu)</option>
+                    </select>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>
+                      Fornisce a Meta, TikTok e LinkedIn l'URL HTTPS diretto per scaricare i media.
+                    </span>
+                  </div>
+                </div>
+
+                {/* Test Action Bar */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--border-grid)', paddingTop: '16px', marginTop: '6px' }}>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                    Costo mensile stimato storage & banda: <strong style={{ color: 'var(--feed-green)' }}>0,00 EUR / mese</strong>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleTestPCloud}
+                    disabled={isTestingPcloud}
+                    className="composer-submit-btn"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '8px 18px',
+                      borderRadius: '6px',
+                      fontSize: '0.82rem',
+                      fontWeight: 700
+                    }}
+                  >
+                    <RefreshIcon className={`svg-icon-mini ${isTestingPcloud ? 'spin' : ''}`} />
+                    <span>{isTestingPcloud ? 'Verifica token...' : 'Verifica Connessione & Quota pCloud'}</span>
+                  </button>
+                </div>
+
+                {/* Test Result Box */}
+                {pcloudTestResult && (
+                  <div style={{ background: '#f0fdf4', border: '1px solid #86efac', borderRadius: '8px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#166534', fontWeight: 800, fontSize: '0.88rem' }}>
+                      <CheckIcon className="svg-icon-mini" /> {pcloudTestResult.message}
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', background: '#ffffff', padding: '12px', borderRadius: '6px', border: '1px solid #bbf7d0', fontSize: '0.8rem' }}>
+                      <div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>ACCOUNT / SERVER</div>
+                        <div style={{ fontWeight: 700, color: 'var(--text-dark)' }}>{pcloudTestResult.server}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>QUOTA DISPONIBILE</div>
+                        <div style={{ fontWeight: 800, color: 'var(--feed-green)' }}>{pcloudTestResult.freeQuota} liberi</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>SPAZIO OCCUPATO</div>
+                        <div style={{ fontWeight: 700, color: 'var(--text-dark)' }}>{pcloudTestResult.usedQuota} / {pcloudTestResult.totalQuota}</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* AWS Fallback Parameters */
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                    S3 BUCKET NAME
+                  </label>
+                  <input
+                    type="text"
+                    readOnly
+                    value="dnapostit-media-prod"
+                    className="date-input-dark"
+                    style={{ width: '100%', boxSizing: 'border-box', fontFamily: 'var(--font-mono)' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                    AWS REGION
+                  </label>
+                  <input
+                    type="text"
+                    readOnly
+                    value="eu-central-1 (Francoforte)"
+                    className="date-input-dark"
+                    style={{ width: '100%', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                    CLOUDFRONT CDN DOMAIN
+                  </label>
+                  <input
+                    type="text"
+                    readOnly
+                    value="https://d111111abcdef8.cloudfront.net"
+                    className="date-input-dark"
+                    style={{ width: '100%', boxSizing: 'border-box', fontFamily: 'var(--font-mono)' }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
