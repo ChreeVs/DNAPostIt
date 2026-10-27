@@ -12,7 +12,6 @@ import {
   ThreadsIcon,
   GoogleBusinessIcon,
   FilterIcon,
-  ChatBubbleIcon,
   BellIcon
 } from './Icons';
 import { OBSERVANCE_DAYS } from '../mockData';
@@ -32,6 +31,50 @@ export default function CalendarView({
   const [viewMode, setViewMode] = useState('month'); // 'month' | 'week'
   const [selectedProjectFilter, setSelectedProjectFilter] = useState('all');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  // Notification Drawer State (published posts, errors, warnings)
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [notifCategory, setNotifCategory] = useState('all'); // 'all' | 'published' | 'alerts' | 'errors'
+  const [notifications, setNotifications] = useState([
+    {
+      id: 'notif-1',
+      category: 'published',
+      title: 'Post Pubblicato',
+      message: 'Post carosello sincronizzato con successo su Instagram e LinkedIn.',
+      time: '12 min fa',
+      read: false
+    },
+    {
+      id: 'notif-2',
+      category: 'alerts',
+      title: 'Avviso Token in Scadenza',
+      message: 'Il token del canale TikTok scadrà tra 5 giorni. Effettua il rinnovo nella vista Rinnovo Canali.',
+      time: '2 ore fa',
+      read: false
+    },
+    {
+      id: 'notif-3',
+      category: 'errors',
+      title: 'Errore API Meta',
+      message: 'Permessi insufficienti o sessione scaduta per la pagina Meta. Riconnetti il canale in Canali Social.',
+      time: 'Ieri alle 16:45',
+      read: true
+    },
+    {
+      id: 'notif-4',
+      category: 'alerts',
+      title: 'Storage pCloud Pronto',
+      message: 'Drive pCloud connesso. Spazio disponibile: 481.6 GB per file multimediali.',
+      time: '2 giorni fa',
+      read: true
+    }
+  ]);
+
+  const unreadNotifCount = notifications.filter(n => !n.read).length;
+  const handleMarkAllNotifsRead = () => setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  const filteredNotifications = notifCategory === 'all'
+    ? notifications
+    : notifications.filter(n => n.category === notifCategory);
 
   const prevMonth = () => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
@@ -166,6 +209,243 @@ export default function CalendarView({
     return true;
   });
 
+  // Reusable Notification Bell with interactive popover drawer
+  const renderNotificationBell = () => (
+    <div style={{ position: 'relative' }}>
+      <button
+        type="button"
+        onClick={() => setIsNotifOpen(!isNotifOpen)}
+        style={{
+          background: isNotifOpen ? '#f1f5f9' : 'transparent',
+          border: 'none',
+          cursor: 'pointer',
+          color: isNotifOpen ? 'var(--primary-granata)' : '#64748b',
+          padding: '6px',
+          borderRadius: '8px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative'
+        }}
+        title="Notifiche piattaforma (post pubblicati, errori, avvisi)"
+      >
+        <BellIcon className="svg-icon" />
+        {unreadNotifCount > 0 && (
+          <span
+            style={{
+              position: 'absolute',
+              top: '2px',
+              right: '2px',
+              width: '18px',
+              height: '18px',
+              backgroundColor: 'var(--primary-granata)',
+              color: '#ffffff',
+              borderRadius: '50%',
+              fontSize: '0.65rem',
+              fontWeight: 800,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 0 0 2px #ffffff'
+            }}
+          >
+            {unreadNotifCount}
+          </span>
+        )}
+      </button>
+
+      {/* Interactive Notification Popover Panel */}
+      {isNotifOpen && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '120%',
+            right: 0,
+            width: '360px',
+            background: '#ffffff',
+            border: '1px solid var(--border-grid)',
+            borderRadius: '12px',
+            boxShadow: '0 12px 36px rgba(0,0,0,0.14)',
+            zIndex: 100,
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column'
+          }}
+        >
+          {/* Header */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '12px 16px',
+              borderBottom: '1px solid var(--border-grid)',
+              background: '#f8fafc'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontWeight: 800, fontSize: '0.92rem', color: 'var(--text-dark)' }}>Notifiche</span>
+              {unreadNotifCount > 0 && (
+                <span
+                  style={{
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    background: '#fee2e2',
+                    color: 'var(--primary-granata)',
+                    padding: '2px 7px',
+                    borderRadius: '10px'
+                  }}
+                >
+                  {unreadNotifCount} nuove
+                </span>
+              )}
+            </div>
+            {unreadNotifCount > 0 && (
+              <button
+                type="button"
+                onClick={handleMarkAllNotifsRead}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--primary-granata)',
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+              >
+                Segna lette
+              </button>
+            )}
+          </div>
+
+          {/* Category Filter Pills */}
+          <div
+            style={{
+              display: 'flex',
+              gap: '6px',
+              padding: '8px 12px',
+              borderBottom: '1px solid var(--border-grid)',
+              background: '#ffffff'
+            }}
+          >
+            {[
+              { key: 'all', label: 'Tutte' },
+              { key: 'published', label: 'Pubblicati' },
+              { key: 'alerts', label: 'Avvisi' },
+              { key: 'errors', label: 'Errori' }
+            ].map((cat) => (
+              <button
+                key={cat.key}
+                type="button"
+                onClick={() => setNotifCategory(cat.key)}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: '16px',
+                  border: notifCategory === cat.key ? '1px solid var(--primary-granata)' : '1px solid var(--border-grid)',
+                  background: notifCategory === cat.key ? '#fef2f2' : 'transparent',
+                  color: notifCategory === cat.key ? 'var(--primary-granata)' : '#64748b',
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Scrollable Notifications List */}
+          <div style={{ maxHeight: '320px', overflowY: 'auto' }}>
+            {filteredNotifications.length === 0 ? (
+              <div style={{ padding: '32px 16px', textAlign: 'center', color: '#94a3b8', fontSize: '0.82rem' }}>
+                Nessuna notifica in questa categoria.
+              </div>
+            ) : (
+              filteredNotifications.map((notif) => (
+                <div
+                  key={notif.id}
+                  style={{
+                    padding: '12px 14px',
+                    borderBottom: '1px solid #f1f5f9',
+                    background: notif.read ? '#ffffff' : '#fcf8f9',
+                    display: 'flex',
+                    gap: '12px',
+                    alignItems: 'flex-start'
+                  }}
+                >
+                  <div style={{ flexShrink: 0, marginTop: '2px' }}>
+                    {notif.category === 'published' && (
+                      <div
+                        style={{
+                          width: '24px',
+                          height: '24px',
+                          borderRadius: '50%',
+                          background: '#dcfce7',
+                          color: '#16a34a',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                      >
+                        <CheckIcon className="svg-icon-mini" />
+                      </div>
+                    )}
+                    {notif.category === 'alerts' && (
+                      <div
+                        style={{
+                          width: '24px',
+                          height: '24px',
+                          borderRadius: '50%',
+                          background: '#fef3c7',
+                          color: '#d97706',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                      >
+                        <BellIcon className="svg-icon-mini" />
+                      </div>
+                    )}
+                    {notif.category === 'errors' && (
+                      <div
+                        style={{
+                          width: '24px',
+                          height: '24px',
+                          borderRadius: '50%',
+                          background: '#fee2e2',
+                          color: '#dc2626',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontWeight: 800,
+                          fontSize: '0.72rem'
+                        }}
+                      >
+                        !
+                      </div>
+                    )}
+                  </div>
+
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
+                      <span style={{ fontWeight: notif.read ? 600 : 800, fontSize: '0.82rem', color: 'var(--text-dark)' }}>
+                        {notif.title}
+                      </span>
+                      <span style={{ fontSize: '0.68rem', color: '#94a3b8' }}>{notif.time}</span>
+                    </div>
+                    <p style={{ margin: 0, fontSize: '0.76rem', color: '#475569', lineHeight: 1.4 }}>
+                      {notif.message}
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="pubblie-main-content">
       {/* GLOBAL DASHBOARD TOP BAR (MATCHING SCREENSHOT) */}
@@ -186,21 +466,7 @@ export default function CalendarView({
 
           {/* Right Header Icons */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <button
-              type="button"
-              style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b', padding: '6px' }}
-              title="Messaggi e commenti"
-            >
-              <ChatBubbleIcon className="svg-icon" />
-            </button>
-
-            <button
-              type="button"
-              style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b', padding: '6px' }}
-              title="Notifiche piattaforma"
-            >
-              <BellIcon className="svg-icon" />
-            </button>
+            {renderNotificationBell()}
 
             <div
               style={{
@@ -223,118 +489,146 @@ export default function CalendarView({
           </div>
         </div>
       ) : (
-        /* SINGLE PROJECT TOP BAR (WITH CHANNELS COUNTERS STRIP) */
-        <div className="pubblie-top-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span
-              style={{
-                width: '12px',
-                height: '12px',
-                borderRadius: '50%',
-                backgroundColor: currentProject ? currentProject.color : 'var(--primary-granata)'
-              }}
-            />
-            <h1 className="pubblie-project-title">
-              {currentProject ? currentProject.name : 'Nessun Progetto Selezionato'}
-            </h1>
+        /* SINGLE PROJECT TOP BAR (WITH CHANNELS COUNTERS STRIP & NOTIFICATIONS) */
+        <div className="pubblie-top-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span
+                style={{
+                  width: '12px',
+                  height: '12px',
+                  borderRadius: '50%',
+                  backgroundColor: currentProject ? currentProject.color : 'var(--primary-granata)'
+                }}
+              />
+              <h1 className="pubblie-project-title">
+                {currentProject ? currentProject.name : 'Nessun Progetto Selezionato'}
+              </h1>
+            </div>
+
+            <div className="pubblie-channels-counters-strip" style={{ marginTop: '12px' }}>
+              {channels.length === 0 ? (
+                <button
+                  type="button"
+                  onClick={onNavigateToChannels}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '5px 14px',
+                    borderRadius: '20px',
+                    border: '1px dashed var(--border-grid)',
+                    background: '#ffffff',
+                    fontSize: '0.76rem',
+                    fontWeight: 600,
+                    color: 'var(--text-secondary)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <PlusIcon className="svg-icon-mini" />
+                  <span>Collega Canale Social</span>
+                </button>
+              ) : (
+                channels.map((ch) => {
+                  let icon = null;
+                  if (ch.platform === 'facebook') icon = <FacebookIcon className="svg-icon-sm" />;
+                  else if (ch.platform === 'instagram') icon = <InstagramIcon className="svg-icon-sm" />;
+                  else if (ch.platform === 'tiktok') icon = <TikTokIcon className="svg-icon-sm" />;
+                  else if (ch.platform === 'youtube') icon = <YouTubeIcon className="svg-icon-sm" />;
+                  else if (ch.platform === 'linkedin') icon = <LinkedInIcon className="svg-icon-sm" />;
+                  else if (ch.platform === 'threads') icon = <ThreadsIcon className="svg-icon-sm" />;
+                  else if (ch.platform === 'gmb') icon = <GoogleBusinessIcon className="svg-icon-sm" />;
+
+                  const isAct = ch.active && ch.connected;
+
+                  return (
+                    <div
+                      key={ch.id}
+                      className="pubblie-channel-bubble-col"
+                      title={`${ch.name} - ${isAct ? 'Attivo' : 'Inattivo'}`}
+                      style={{ opacity: isAct ? 1 : 0.45 }}
+                    >
+                      <div
+                        className="pubblie-channel-bubble-circle"
+                        style={{ border: `1.5px solid ${ch.color}` }}
+                      >
+                        <span style={{ color: ch.color }}>{icon}</span>
+                      </div>
+                      <span className="pubblie-channel-bubble-count">
+                        {ch.count || 0}
+                      </span>
+                    </div>
+                  );
+                })
+              )}
+
+              {channels.length > 0 && (
+                <div
+                  className="pubblie-channel-bubble-col"
+                  title="Gestisci o attiva canali"
+                  onClick={onNavigateToChannels}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="pubblie-channel-bubble-circle add-btn">
+                    <PlusIcon className="svg-icon-sm" />
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="pubblie-channels-counters-strip">
-            {channels.length === 0 ? (
-              <button
-                type="button"
-                onClick={onNavigateToChannels}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '5px 14px',
-                  borderRadius: '20px',
-                  border: '1px dashed var(--border-grid)',
-                  background: '#ffffff',
-                  fontSize: '0.76rem',
-                  fontWeight: 600,
-                  color: 'var(--text-secondary)',
-                  cursor: 'pointer'
-                }}
-              >
-                <PlusIcon className="svg-icon-mini" />
-                <span>Collega Canale Social</span>
-              </button>
-            ) : (
-              channels.map((ch) => {
-                let icon = null;
-                if (ch.platform === 'facebook') icon = <FacebookIcon className="svg-icon-sm" />;
-                else if (ch.platform === 'instagram') icon = <InstagramIcon className="svg-icon-sm" />;
-                else if (ch.platform === 'tiktok') icon = <TikTokIcon className="svg-icon-sm" />;
-                else if (ch.platform === 'youtube') icon = <YouTubeIcon className="svg-icon-sm" />;
-                else if (ch.platform === 'linkedin') icon = <LinkedInIcon className="svg-icon-sm" />;
-                else if (ch.platform === 'threads') icon = <ThreadsIcon className="svg-icon-sm" />;
-                else if (ch.platform === 'gmb') icon = <GoogleBusinessIcon className="svg-icon-sm" />;
+          {/* Right Header Icons in Single Project mode */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            {renderNotificationBell()}
 
-                const isAct = ch.active && ch.connected;
-
-                return (
-                  <div
-                    key={ch.id}
-                    className="pubblie-channel-bubble-col"
-                    title={`${ch.name} - ${isAct ? 'Attivo' : 'Inattivo'}`}
-                    style={{ opacity: isAct ? 1 : 0.45 }}
-                  >
-                    <div
-                      className="pubblie-channel-bubble-circle"
-                      style={{ border: `1.5px solid ${ch.color}` }}
-                    >
-                      <span style={{ color: ch.color }}>{icon}</span>
-                    </div>
-                    <span className="pubblie-channel-bubble-count">
-                      {ch.count || 0}
-                    </span>
-                  </div>
-                );
-              })
-            )}
-
-            {channels.length > 0 && (
-              <div
-                className="pubblie-channel-bubble-col"
-                title="Gestisci o attiva canali"
-                onClick={onNavigateToChannels}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className="pubblie-channel-bubble-circle add-btn">
-                  <PlusIcon className="svg-icon-sm" />
-                </div>
-              </div>
-            )}
+            <div
+              style={{
+                width: '34px',
+                height: '34px',
+                borderRadius: '50%',
+                backgroundColor: 'var(--primary-granata)',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 700,
+                fontSize: '0.8rem',
+                cursor: 'pointer'
+              }}
+              title="Profilo Utente"
+            >
+              AD
+            </div>
           </div>
         </div>
       )}
 
-      {/* CALENDAR CONTROLS SUBHEAD (MATCHING SCREENSHOT) */}
+      {/* CALENDAR CONTROLS SUBHEAD (CLEAN RESPONSIVE FLEX LAYOUT) */}
       <div className="pubblie-calendar-nav-bar">
-        <div className="pubblie-cal-subhead">
-          <h2>Calendario editoriale</h2>
-        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+          <div className="pubblie-cal-subhead">
+            <h2 style={{ margin: 0 }}>Calendario editoriale</h2>
+          </div>
 
-        <div className="pubblie-nav-actions-left">
-          <button className="pubblie-btn-nav" onClick={prevMonth} title="Mese precedente">
-            <ChevronLeftIcon className="svg-icon-sm" />
-          </button>
-          <button className="pubblie-btn-nav" onClick={nextMonth} title="Mese successivo">
-            <ChevronRightIcon className="svg-icon-sm" />
-          </button>
-          <button className="pubblie-btn-nav today-btn" onClick={jumpToToday}>
-            Oggi
-          </button>
-        </div>
+          <div className="pubblie-nav-actions-left">
+            <button className="pubblie-btn-nav" onClick={prevMonth} title="Mese precedente">
+              <ChevronLeftIcon className="svg-icon-sm" />
+            </button>
+            <button className="pubblie-btn-nav" onClick={nextMonth} title="Mese successivo">
+              <ChevronRightIcon className="svg-icon-sm" />
+            </button>
+            <button className="pubblie-btn-nav today-btn" onClick={jumpToToday}>
+              Oggi
+            </button>
+          </div>
 
-        <div className="pubblie-month-display">
-          ottobre 2026
+          <div className="pubblie-month-display">
+            ottobre 2026
+          </div>
         </div>
 
         {/* Right side controls: Filtri and Mese / Settimana toggle */}
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           {/* Filtri button */}
           <div style={{ position: 'relative' }}>
             <button
@@ -365,13 +659,13 @@ export default function CalendarView({
                   position: 'absolute',
                   top: '110%',
                   right: 0,
-                  width: '220px',
+                  width: '230px',
                   background: '#ffffff',
                   border: '1px solid var(--border-grid)',
                   borderRadius: '8px',
                   boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
                   padding: '8px 0',
-                  zIndex: 40
+                  zIndex: 50
                 }}
               >
                 <div style={{ padding: '6px 14px', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
@@ -393,35 +687,41 @@ export default function CalendarView({
                 >
                   Tutti i progetti ({posts.length})
                 </div>
-                {projects.map((proj) => {
-                  const projPostsCount = posts.filter((p) => p.projectId === proj.id).length;
-                  return (
-                    <div
-                      key={proj.id}
-                      onClick={() => {
-                        setSelectedProjectFilter(proj.id);
-                        setIsFilterOpen(false);
-                      }}
-                      style={{
-                        padding: '8px 14px',
-                        fontSize: '0.8rem',
-                        fontWeight: selectedProjectFilter === proj.id ? 700 : 500,
-                        color: selectedProjectFilter === proj.id ? 'var(--primary-granata)' : '#334155',
-                        background: selectedProjectFilter === proj.id ? '#fef2f2' : 'transparent',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between'
-                      }}
-                    >
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: proj.color }} />
-                        {proj.name}
-                      </span>
-                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{projPostsCount}</span>
-                    </div>
-                  );
-                })}
+                {projects.length === 0 ? (
+                  <div style={{ padding: '8px 14px', fontSize: '0.76rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                    Nessun progetto registrato
+                  </div>
+                ) : (
+                  projects.map((proj) => {
+                    const projPostsCount = posts.filter((p) => p.projectId === proj.id).length;
+                    return (
+                      <div
+                        key={proj.id}
+                        onClick={() => {
+                          setSelectedProjectFilter(proj.id);
+                          setIsFilterOpen(false);
+                        }}
+                        style={{
+                          padding: '8px 14px',
+                          fontSize: '0.8rem',
+                          fontWeight: selectedProjectFilter === proj.id ? 700 : 500,
+                          color: selectedProjectFilter === proj.id ? 'var(--primary-granata)' : '#334155',
+                          background: selectedProjectFilter === proj.id ? '#fef2f2' : 'transparent',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between'
+                        }}
+                      >
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: proj.color }} />
+                          {proj.name}
+                        </span>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{projPostsCount}</span>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             )}
           </div>

@@ -159,15 +159,17 @@ export default function Sidebar({
               )}
             </div>
 
-            {/* Vedi tutti i progetti */}
-            <div
-              className={`pubblie-nav-item folder-item ${activeView === 'projects' ? 'active' : ''}`}
-              onClick={() => setActiveView('projects')}
-              style={{ marginTop: '8px', paddingLeft: '14px', fontSize: '0.82rem' }}
-            >
-              <FolderIcon className="svg-icon-sm" style={{ color: '#f59e0b' }} />
-              <span>Vedi tutti i progetti</span>
-            </div>
+            {/* Vedi tutti i progetti (solo se ci sono progetti) */}
+            {projects.length > 0 && (
+              <div
+                className={`pubblie-nav-item folder-item ${activeView === 'projects' ? 'active' : ''}`}
+                onClick={() => setActiveView('projects')}
+                style={{ marginTop: '8px', paddingLeft: '14px', fontSize: '0.82rem' }}
+              >
+                <FolderIcon className="svg-icon-sm" style={{ color: '#f59e0b' }} />
+                <span>Vedi tutti i progetti</span>
+              </div>
+            )}
 
             {/* + Nuovo progetto */}
             <div
@@ -232,14 +234,16 @@ export default function Sidebar({
             </div>
 
             {/* Shortcut to switch project or view all */}
-            <div
-              className="pubblie-nav-item folder-item"
-              style={{ marginTop: '16px' }}
-              onClick={() => setActiveView('projects')}
-            >
-              <FolderIcon className="svg-icon" style={{ color: 'var(--primary-granata)' }} />
-              <span>Tutti i progetti</span>
-            </div>
+            {projects.length > 0 && (
+              <div
+                className="pubblie-nav-item folder-item"
+                style={{ marginTop: '16px' }}
+                onClick={() => setActiveView('projects')}
+              >
+                <FolderIcon className="svg-icon" style={{ color: 'var(--primary-granata)' }} />
+                <span>Tutti i progetti</span>
+              </div>
+            )}
           </>
         )}
       </nav>

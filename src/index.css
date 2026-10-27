@@ -330,9 +330,11 @@ body {
 
 /* CALENDAR NAV BAR */
 .pubblie-calendar-nav-bar {
-  display: grid;
-  grid-template-columns: 240px 180px 1fr;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
   margin-top: 8px;
   padding-bottom: 6px;
 }
