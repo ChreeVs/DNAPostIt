@@ -256,7 +256,7 @@ export default function ComposerModal({
               )}
             </div>
 
-            {/* First Comment Toggle (Pubblie feature) */}
+            {/* First Comment Toggle */}
             <div className="first-comment-box">
               <div
                 className="toggle-container"

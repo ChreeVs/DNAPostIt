@@ -1,13 +1,12 @@
 import React from 'react';
 import {
-  PubblieLogo,
+  DnaPostItLogo,
   PencilIcon,
   ContentIcon,
   CalendarIcon,
   Grid3x3Icon,
   ChatBubbleIcon,
   LinkChainIcon,
-  IntegrationsIcon,
   AnalyticsIcon,
   UsersGroupIcon,
   HashGridIcon,
@@ -22,15 +21,27 @@ import {
 export default function Sidebar({
   activeView,
   setActiveView,
-  onOpenComposer
+  onOpenComposer,
+  currentProject
 }) {
   return (
     <aside className="pubblie-sidebar">
       {/* Brand Header */}
       <div className="pubblie-sidebar-header">
-        <div className="pubblie-logo-row">
-          <PubblieLogo className="pubblie-logo-svg" />
-          <span className="pubblie-brand-name">Pubblie</span>
+        <div className="pubblie-logo-row" style={{ cursor: 'pointer' }} onClick={() => setActiveView('calendar')}>
+          <img
+            src="/logo.png"
+            alt="DNA PostIt"
+            style={{ width: '32px', height: '32px', borderRadius: '8px', objectFit: 'cover' }}
+            onError={(e) => {
+              // fallback to SVG if image not yet loaded
+              e.target.style.display = 'none';
+            }}
+          />
+          <DnaPostItLogo className="pubblie-logo-svg" style={{ width: '32px', height: '32px' }} />
+          <span className="pubblie-brand-name" style={{ letterSpacing: '-0.02em', fontWeight: 800 }}>
+            DNA PostIt
+          </span>
         </div>
 
         {/* Torna alla home */}
@@ -39,10 +50,20 @@ export default function Sidebar({
           <span>TORNA ALLA HOME</span>
         </div>
 
-        {/* Current Project Tag */}
-        <div className="pubblie-active-project-pill">
-          <span className="project-orange-dot" />
-          <span className="project-title-text">PAA</span>
+        {/* Current Active Project Pill */}
+        <div
+          className="pubblie-active-project-pill"
+          onClick={() => setActiveView('projects')}
+          title="Clicca per cambiare o gestire i progetti"
+          style={{ cursor: 'pointer' }}
+        >
+          <span
+            className="project-orange-dot"
+            style={{ backgroundColor: currentProject ? currentProject.color : 'var(--primary-granata)' }}
+          />
+          <span className="project-title-text">
+            {currentProject ? currentProject.name : 'PAA'}
+          </span>
         </div>
       </div>
 
@@ -57,19 +78,19 @@ export default function Sidebar({
         </div>
 
         <div
-          className={`pubblie-nav-item ${activeView === 'contents' ? 'active' : ''}`}
-          onClick={() => setActiveView('contents')}
-        >
-          <ContentIcon className="svg-icon" />
-          <span>Contenuti</span>
-        </div>
-
-        <div
           className={`pubblie-nav-item ${activeView === 'calendar' ? 'active' : ''}`}
           onClick={() => setActiveView('calendar')}
         >
           <CalendarIcon className="svg-icon" />
           <span>Calendario</span>
+        </div>
+
+        <div
+          className={`pubblie-nav-item ${activeView === 'contents' ? 'active' : ''}`}
+          onClick={() => setActiveView('contents')}
+        >
+          <ContentIcon className="svg-icon" />
+          <span>Contenuti</span>
         </div>
 
         <div
@@ -81,27 +102,27 @@ export default function Sidebar({
         </div>
 
         <div
+          className={`pubblie-nav-item ${activeView === 'channels' ? 'active' : ''}`}
+          onClick={() => setActiveView('channels')}
+        >
+          <LinkChainIcon className="svg-icon" />
+          <span>Canali Social</span>
+        </div>
+
+        <div
+          className={`pubblie-nav-item ${activeView === 'projects' ? 'active' : ''}`}
+          onClick={() => setActiveView('projects')}
+        >
+          <FolderIcon className="svg-icon" />
+          <span>Progetti</span>
+        </div>
+
+        <div
           className={`pubblie-nav-item ${activeView === 'comments' ? 'active' : ''}`}
           onClick={() => setActiveView('comments')}
         >
           <ChatBubbleIcon className="svg-icon" />
           <span>Commenti</span>
-        </div>
-
-        <div
-          className={`pubblie-nav-item ${activeView === 'channels' ? 'active' : ''}`}
-          onClick={() => setActiveView('channels')}
-        >
-          <LinkChainIcon className="svg-icon" />
-          <span>Canali</span>
-        </div>
-
-        <div
-          className={`pubblie-nav-item ${activeView === 'integrations' ? 'active' : ''}`}
-          onClick={() => setActiveView('integrations')}
-        >
-          <IntegrationsIcon className="svg-icon" />
-          <span>Integrazioni (MCP & S3)</span>
         </div>
 
         <div
@@ -121,17 +142,6 @@ export default function Sidebar({
         </div>
 
         <div
-          className="pubblie-nav-item dropdown-toggle"
-          onClick={() => {}}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <HashGridIcon className="svg-icon" />
-            <span>Varie</span>
-          </div>
-          <ChevronDownIcon className="svg-icon-sm" />
-        </div>
-
-        <div
           className={`pubblie-nav-item ${activeView === 'settings' ? 'active' : ''}`}
           onClick={() => setActiveView('settings')}
         >
@@ -139,18 +149,22 @@ export default function Sidebar({
           <span>Impostazioni</span>
         </div>
 
-        {/* Vedi tutti i progetti */}
-        <div className="pubblie-nav-item folder-item" style={{ marginTop: '16px' }}>
-          <FolderIcon className="svg-icon" style={{ color: '#d97706' }} />
-          <span>Vedi tutti i progetti</span>
+        {/* Shortcut to switch project */}
+        <div
+          className={`pubblie-nav-item folder-item ${activeView === 'projects' ? 'active' : ''}`}
+          style={{ marginTop: '16px' }}
+          onClick={() => setActiveView('projects')}
+        >
+          <FolderIcon className="svg-icon" style={{ color: 'var(--primary-granata)' }} />
+          <span>Tutti i progetti</span>
         </div>
       </nav>
 
       {/* Sidebar Footer */}
       <div className="pubblie-sidebar-footer">
-        <div className="pubblie-footer-link">
+        <div className="pubblie-footer-link" onClick={() => setActiveView('settings')}>
           <HelpCircleIcon className="svg-icon-sm" />
-          <span>Aiuto</span>
+          <span>Guida & MCP</span>
         </div>
         <div className="pubblie-footer-link">
           <PhoneIcon className="svg-icon-sm" />

@@ -15,10 +15,12 @@ import {
 import { OBSERVANCE_DAYS } from '../mockData';
 
 export default function CalendarView({
+  currentProject,
   posts,
   channels,
   onOpenComposer,
-  onSelectPost
+  onSelectPost,
+  onNavigateToChannels
 }) {
   const [currentDate, setCurrentDate] = useState(new Date(2026, 9, 27)); // Oct 2026
 
@@ -78,7 +80,6 @@ export default function CalendarView({
   };
 
   // Calendar matrix calculation for October 2026
-  // Week 40 to Week 44
   const weeksData = [
     {
       weekNumber: 'Sm40',
@@ -146,7 +147,19 @@ export default function CalendarView({
     <div className="pubblie-main-content">
       {/* Top Project & Social Channels Row */}
       <div className="pubblie-top-header">
-        <h1 className="pubblie-project-title">PAA</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span
+            style={{
+              width: '12px',
+              height: '12px',
+              borderRadius: '50%',
+              backgroundColor: currentProject ? currentProject.color : 'var(--primary-granata)'
+            }}
+          />
+          <h1 className="pubblie-project-title">
+            {currentProject ? currentProject.name : 'PAA'}
+          </h1>
+        </div>
 
         <div className="pubblie-channels-counters-strip">
           {channels.map((ch) => {
@@ -159,20 +172,34 @@ export default function CalendarView({
             else if (ch.platform === 'threads') icon = <ThreadsIcon className="svg-icon-sm" />;
             else if (ch.platform === 'gmb') icon = <GoogleBusinessIcon className="svg-icon-sm" />;
 
+            const isAct = ch.active && ch.connected;
+
             return (
-              <div key={ch.id} className="pubblie-channel-bubble-col" title={ch.name}>
+              <div
+                key={ch.id}
+                className="pubblie-channel-bubble-col"
+                title={`${ch.name} - ${isAct ? 'Attivo' : 'Inattivo'}`}
+                style={{ opacity: isAct ? 1 : 0.45 }}
+              >
                 <div
                   className="pubblie-channel-bubble-circle"
                   style={{ border: `1.5px solid ${ch.color}` }}
                 >
                   <span style={{ color: ch.color }}>{icon}</span>
                 </div>
-                <span className="pubblie-channel-bubble-count">{ch.count}</span>
+                <span className="pubblie-channel-bubble-count">
+                  {ch.count || 0}
+                </span>
               </div>
             );
           })}
 
-          <div className="pubblie-channel-bubble-col" title="Aggiungi canale">
+          <div
+            className="pubblie-channel-bubble-col"
+            title="Gestisci o attiva canali"
+            onClick={onNavigateToChannels}
+            style={{ cursor: 'pointer' }}
+          >
             <div className="pubblie-channel-bubble-circle add-btn">
               <PlusIcon className="svg-icon-sm" />
             </div>
@@ -233,6 +260,7 @@ export default function CalendarView({
                   key={dIdx}
                   className={`pubblie-day-cell ${!dayObj.isCurrentMonth ? 'other-month' : ''} ${dayObj.isToday ? 'today-cell' : ''}`}
                   onClick={() => onOpenComposer(dayObj.dateStr)}
+                  title="Clicca per programmare un post in questo giorno"
                 >
                   <div className="pubblie-cell-header">
                     <span className="pubblie-cell-date-num">{dayObj.dayNumber}</span>

@@ -1,20 +1,31 @@
 import React from 'react';
 
-// Pubblie speech bubble logo
-export const PubblieLogo = ({ className = "svg-icon" }) => (
+// DNAPostIt Official Brand Logo (DNA double helix intertwined with post layers in Granata & White)
+export const DnaPostItLogo = ({ className = "svg-icon" }) => (
   <svg className={className} viewBox="0 0 36 36" fill="none">
-    <rect width="36" height="36" rx="10" fill="url(#granata-grad)" />
+    <rect width="36" height="36" rx="9" fill="url(#dna-grad)" />
     <path
-      d="M18 9C13.03 9 9 13.03 9 18C9 20.12 9.74 22.07 10.97 23.61L9.5 27L13.1 25.68C14.54 26.52 16.21 27 18 27C22.97 27 27 22.97 27 18C27 13.03 22.97 9 18 9Z"
+      d="M10 11C12 11 14 13.5 18 18C22 22.5 24 25 26 25"
       stroke="#ffffff"
-      strokeWidth="2.5"
+      strokeWidth="2.4"
       strokeLinecap="round"
-      strokeLinejoin="round"
     />
-    <circle cx="18" cy="18" r="3.5" fill="#ffffff" />
+    <path
+      d="M26 11C24 11 22 13.5 18 18C14 22.5 12 25 10 25"
+      stroke="#ffffff"
+      strokeWidth="2.4"
+      strokeLinecap="round"
+    />
+    <line x1="12" y1="13" x2="24" y2="13" stroke="#fecdd3" strokeWidth="1.8" strokeLinecap="round" />
+    <line x1="15" y1="18" x2="21" y2="18" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />
+    <line x1="12" y1="23" x2="24" y2="23" stroke="#fecdd3" strokeWidth="1.8" strokeLinecap="round" />
+    <circle cx="10" cy="11" r="2" fill="#ffffff" />
+    <circle cx="26" cy="11" r="2" fill="#ffffff" />
+    <circle cx="10" cy="25" r="2" fill="#ffffff" />
+    <circle cx="26" cy="25" r="2" fill="#ffffff" />
     <defs>
-      <linearGradient id="granata-grad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
-        <stop stopColor="#9b1b30" />
+      <linearGradient id="dna-grad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#9e1b32" />
         <stop stopColor="#630c1f" />
       </linearGradient>
     </defs>
@@ -299,4 +310,40 @@ export const SettingsIcon = ({ className = "svg-icon" }) => (
     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" strokeWidth="2" />
   </svg>
 );
+
+export const TrashIcon = ({ className = "svg-icon" }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <polyline points="3 6 5 6 21 6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+export const ExternalLinkIcon = ({ className = "svg-icon" }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <polyline points="15 3 21 3 21 9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <line x1="10" y1="14" x2="21" y2="3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+export const KeyIcon = ({ className = "svg-icon" }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <path d="M21 2l-2 2m-1.5 1.5L14 9l-3-3L3.5 13.5a5 5 0 1 0 7 7L18 13l2.5-2.5m-3-3l2-2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+export const DatabaseIcon = ({ className = "svg-icon" }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <ellipse cx="12" cy="5" rx="9" ry="3" strokeWidth="2" />
+    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" strokeWidth="2" />
+    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" strokeWidth="2" />
+  </svg>
+);
+
+export const ActivityIcon = ({ className = "svg-icon" }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 
