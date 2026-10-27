@@ -3,6 +3,7 @@ import Sidebar from './components/Sidebar';
 import CalendarView from './components/CalendarView';
 import ChannelsView from './components/ChannelsView';
 import ProjectsView from './components/ProjectsView';
+import ChannelRenewalView from './components/ChannelRenewalView';
 import SettingsView from './components/SettingsView';
 import ComposerModal from './components/ComposerModal';
 import {
@@ -13,20 +14,24 @@ import {
 } from './mockData';
 
 export default function App() {
-  const [activeView, setActiveView] = useState('calendar');
+  // Navigation & Workspace Mode
+  // 'global' = viewing platform Dashboard (all projects calendar, projects list on left)
+  // 'project' = viewing specific project workspace (PAA, Broker, etc. with single-project menu)
+  const [workspaceMode, setWorkspaceMode] = useState('global');
+  const [activeView, setActiveView] = useState('dashboard');
 
   // Projects State
   const [projects, setProjects] = useState(INITIAL_PROJECTS);
   const [currentProjectId, setCurrentProjectId] = useState(
-    INITIAL_PROJECTS.length > 0 ? INITIAL_PROJECTS[0].id : 'proj-1'
+    INITIAL_PROJECTS.length > 0 ? INITIAL_PROJECTS[2].id : 'proj-paa' // PAA by default
   );
 
   const currentProject =
     projects.find((p) => p.id === currentProjectId) || projects[0] || {
-      id: 'proj-1',
-      name: 'DNA PostIt',
-      slug: 'dna-postit',
-      color: '#800020'
+      id: 'proj-paa',
+      name: 'PAA',
+      slug: 'paa',
+      color: '#f97316'
     };
 
   // Channels & Posts State
@@ -52,14 +57,37 @@ export default function App() {
   };
 
   const handleSavePost = (savedPost) => {
+    const proj =
+      projects.find((p) => p.id === (savedPost.projectId || currentProjectId)) ||
+      currentProject;
+
+    const datePart =
+      savedPost.date ||
+      (savedPost.scheduledDate ? savedPost.scheduledDate.split('T')[0] : '2026-10-28');
+    const timePart =
+      savedPost.time ||
+      (savedPost.scheduledDate
+        ? savedPost.scheduledDate.split('T')[1]?.substring(0, 5)
+        : '10:30');
+
+    const enrichedPost = {
+      ...savedPost,
+      projectId: proj.id,
+      projectName: proj.name,
+      projectColor: proj.color,
+      date: datePart,
+      time: timePart,
+      type: savedPost.type || 'FEED'
+    };
+
     setPosts((prev) => {
-      const existsIndex = prev.findIndex((p) => p.id === savedPost.id);
+      const existsIndex = prev.findIndex((p) => p.id === enrichedPost.id);
       if (existsIndex >= 0) {
         const updated = [...prev];
-        updated[existsIndex] = savedPost;
+        updated[existsIndex] = enrichedPost;
         return updated;
       } else {
-        return [savedPost, ...prev];
+        return [enrichedPost, ...prev];
       }
     });
   };
@@ -67,11 +95,15 @@ export default function App() {
   // Project Handlers
   const handleSelectProject = (projectId) => {
     setCurrentProjectId(projectId);
+    setWorkspaceMode('project');
+    setActiveView('calendar');
   };
 
   const handleCreateProject = (newProject) => {
     setProjects((prev) => [newProject, ...prev]);
     setCurrentProjectId(newProject.id);
+    setWorkspaceMode('project');
+    setActiveView('calendar');
   };
 
   const handleDeleteProject = (projectId) => {
@@ -103,29 +135,89 @@ export default function App() {
     setChannels((prev) => [newChannel, ...prev]);
   };
 
+  // Channel Renewal Handlers
+  const handleRenewChannel = (channelId) => {
+    setChannels((prev) =>
+      prev.map((ch) =>
+        ch.id === channelId
+          ? {
+              ...ch,
+              expiresInDays: 60,
+              expiryDate: '2026-12-26',
+              connected: true,
+              active: true,
+              lastSync: 'Pochi secondi fa'
+            }
+          : ch
+      )
+    );
+  };
+
+  const handleRenewAllExpiring = () => {
+    setChannels((prev) =>
+      prev.map((ch) =>
+        ch.expiresInDays <= 14
+          ? {
+              ...ch,
+              expiresInDays: 60,
+              expiryDate: '2026-12-26',
+              connected: true,
+              active: true,
+              lastSync: 'Pochi secondi fa'
+            }
+          : ch
+      )
+    );
+  };
+
   return (
     <div className="pubblie-app-layout">
-      {/* DNAPostIt Sidebar */}
+      {/* DNAPostIt Sidebar (Dual Mode: Global Home vs Project Workspace) */}
       <Sidebar
         activeView={activeView}
         setActiveView={setActiveView}
-        onOpenComposer={() => handleOpenComposer()}
+        workspaceMode={workspaceMode}
+        setWorkspaceMode={setWorkspaceMode}
+        projects={projects}
         currentProject={currentProject}
+        onSelectProject={handleSelectProject}
+        onOpenComposer={() => handleOpenComposer()}
+        onOpenCreateProject={() => setActiveView('projects')}
       />
 
       {/* Main Content Area */}
       <main className="pubblie-main-wrapper">
-        {activeView === 'calendar' && (
+        {/* GLOBAL DASHBOARD: Consolidated calendar showing all projects (matches screenshot) */}
+        {activeView === 'dashboard' && (
           <CalendarView
+            isGlobalDashboard={true}
             currentProject={currentProject}
+            projects={projects}
             posts={posts}
             channels={channels}
             onOpenComposer={handleOpenComposer}
             onSelectPost={handleSelectPostToEdit}
             onNavigateToChannels={() => setActiveView('channels')}
+            onSelectProjectFromCard={handleSelectProject}
           />
         )}
 
+        {/* SINGLE PROJECT CALENDAR: Shows project-specific channels counters & posts */}
+        {activeView === 'calendar' && (
+          <CalendarView
+            isGlobalDashboard={false}
+            currentProject={currentProject}
+            projects={projects}
+            posts={posts}
+            channels={channels}
+            onOpenComposer={handleOpenComposer}
+            onSelectPost={handleSelectPostToEdit}
+            onNavigateToChannels={() => setActiveView('channels')}
+            onSelectProjectFromCard={handleSelectProject}
+          />
+        )}
+
+        {/* PROJECTS WORKSPACES VIEW */}
         {activeView === 'projects' && (
           <ProjectsView
             projects={projects}
@@ -137,6 +229,16 @@ export default function App() {
           />
         )}
 
+        {/* RINNOVO CANALI (Token expiration management view) */}
+        {activeView === 'renewal' && (
+          <ChannelRenewalView
+            channels={channels}
+            onRenewChannel={handleRenewChannel}
+            onRenewAllExpiring={handleRenewAllExpiring}
+          />
+        )}
+
+        {/* CHANNELS MANAGEMENT VIEW */}
         {activeView === 'channels' && (
           <ChannelsView
             channels={channels}
@@ -145,6 +247,7 @@ export default function App() {
           />
         )}
 
+        {/* SETTINGS VIEW (Project, Channels, MCP Hub, AWS Media, Docker) */}
         {activeView === 'settings' && (
           <SettingsView
             currentProject={currentProject}
@@ -157,14 +260,14 @@ export default function App() {
           />
         )}
 
-        {/* Informative functional placeholders for additional views */}
-        {['contents', 'igfeed', 'comments', 'analytics', 'team'].includes(activeView) && (
+        {/* OTHER PROJECT SECTIONS */}
+        {['contents', 'igfeed', 'comments', 'analytics'].includes(activeView) && (
           <div style={{ padding: '40px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <h2 style={{ fontSize: '1.4rem', textTransform: 'capitalize', color: 'var(--text-dark)' }}>
               Sezione {activeView} ({currentProject.name})
             </h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-              Questa sezione è sincronizzata per il workspace <strong>{currentProject.name}</strong>. Clicca su <strong>Calendario</strong> nella barra laterale per tornare alla pianificazione dei post.
+              Questa sezione è attiva per il workspace <strong>{currentProject.name}</strong>. Clicca su <strong>Calendario</strong> o su <strong>TORNA ALLA HOME</strong> per tornare alla visione complessiva.
             </p>
           </div>
         )}
@@ -176,6 +279,8 @@ export default function App() {
           isOpen={isComposerOpen}
           initialDate={composerInitialDate}
           initialData={composerInitialData}
+          projects={projects}
+          currentProject={currentProject}
           onClose={() => setIsComposerOpen(false)}
           onSave={handleSavePost}
         />

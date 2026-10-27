@@ -10,19 +10,28 @@ import {
   YouTubeIcon,
   LinkedInIcon,
   ThreadsIcon,
-  GoogleBusinessIcon
+  GoogleBusinessIcon,
+  FilterIcon,
+  ChatBubbleIcon,
+  BellIcon
 } from './Icons';
 import { OBSERVANCE_DAYS } from '../mockData';
 
 export default function CalendarView({
+  isGlobalDashboard = false,
   currentProject,
+  projects = [],
   posts,
   channels,
   onOpenComposer,
   onSelectPost,
-  onNavigateToChannels
+  onNavigateToChannels,
+  onSelectProjectFromCard
 }) {
   const [currentDate, setCurrentDate] = useState(new Date(2026, 9, 27)); // Oct 2026
+  const [viewMode, setViewMode] = useState('month'); // 'month' | 'week'
+  const [selectedProjectFilter, setSelectedProjectFilter] = useState('all');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const prevMonth = () => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
@@ -58,6 +67,7 @@ export default function CalendarView({
           else if (p === 'linkedin') { icon = <LinkedInIcon className="svg-icon-mini" />; bgColor = '#0a66c2'; }
           else if (p === 'youtube') { icon = <YouTubeIcon className="svg-icon-mini" />; bgColor = '#ff0000'; }
           else if (p === 'threads') { icon = <ThreadsIcon className="svg-icon-mini" />; bgColor = '#111'; }
+          else if (p === 'gmb') { icon = <GoogleBusinessIcon className="svg-icon-mini" />; bgColor = '#4285f4'; }
 
           return (
             <div
@@ -143,81 +153,160 @@ export default function CalendarView({
     }
   ];
 
+  // Filter posts based on mode and filter selection
+  const displayedPosts = posts.filter((p) => {
+    if (!isGlobalDashboard) {
+      // In project mode: only this project's posts
+      return p.projectId === (currentProject ? currentProject.id : 'proj-paa');
+    }
+    // In global dashboard: check filter
+    if (selectedProjectFilter !== 'all') {
+      return p.projectId === selectedProjectFilter;
+    }
+    return true;
+  });
+
   return (
     <div className="pubblie-main-content">
-      {/* Top Project & Social Channels Row */}
-      <div className="pubblie-top-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span
-            style={{
-              width: '12px',
-              height: '12px',
-              borderRadius: '50%',
-              backgroundColor: currentProject ? currentProject.color : 'var(--primary-granata)'
-            }}
-          />
-          <h1 className="pubblie-project-title">
-            {currentProject ? currentProject.name : 'PAA'}
+      {/* GLOBAL DASHBOARD TOP BAR (MATCHING SCREENSHOT) */}
+      {isGlobalDashboard ? (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '16px 24px',
+            borderBottom: '1px solid var(--border-grid)',
+            background: '#ffffff'
+          }}
+        >
+          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#334155', letterSpacing: '-0.02em', margin: 0 }}>
+            Dashboard
           </h1>
-        </div>
 
-        <div className="pubblie-channels-counters-strip">
-          {channels.map((ch) => {
-            let icon = null;
-            if (ch.platform === 'facebook') icon = <FacebookIcon className="svg-icon-sm" />;
-            else if (ch.platform === 'instagram') icon = <InstagramIcon className="svg-icon-sm" />;
-            else if (ch.platform === 'tiktok') icon = <TikTokIcon className="svg-icon-sm" />;
-            else if (ch.platform === 'youtube') icon = <YouTubeIcon className="svg-icon-sm" />;
-            else if (ch.platform === 'linkedin') icon = <LinkedInIcon className="svg-icon-sm" />;
-            else if (ch.platform === 'threads') icon = <ThreadsIcon className="svg-icon-sm" />;
-            else if (ch.platform === 'gmb') icon = <GoogleBusinessIcon className="svg-icon-sm" />;
+          {/* Right Header Icons */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <button
+              type="button"
+              style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b', padding: '6px' }}
+              title="Messaggi e commenti"
+            >
+              <ChatBubbleIcon className="svg-icon" />
+            </button>
 
-            const isAct = ch.active && ch.connected;
-
-            return (
-              <div
-                key={ch.id}
-                className="pubblie-channel-bubble-col"
-                title={`${ch.name} - ${isAct ? 'Attivo' : 'Inattivo'}`}
-                style={{ opacity: isAct ? 1 : 0.45 }}
+            <div style={{ position: 'relative', cursor: 'pointer' }} title="Notifiche piattaforma">
+              <span
+                style={{
+                  background: '#f43f5e',
+                  color: '#ffffff',
+                  fontSize: '0.68rem',
+                  fontWeight: 800,
+                  padding: '2px 7px',
+                  borderRadius: '12px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '2px'
+                }}
               >
-                <div
-                  className="pubblie-channel-bubble-circle"
-                  style={{ border: `1.5px solid ${ch.color}` }}
-                >
-                  <span style={{ color: ch.color }}>{icon}</span>
-                </div>
-                <span className="pubblie-channel-bubble-count">
-                  {ch.count || 0}
-                </span>
-              </div>
-            );
-          })}
+                469
+              </span>
+            </div>
 
-          <div
-            className="pubblie-channel-bubble-col"
-            title="Gestisci o attiva canali"
-            onClick={onNavigateToChannels}
-            style={{ cursor: 'pointer' }}
-          >
-            <div className="pubblie-channel-bubble-circle add-btn">
-              <PlusIcon className="svg-icon-sm" />
+            <div
+              style={{
+                width: '34px',
+                height: '34px',
+                borderRadius: '50%',
+                backgroundColor: 'var(--primary-granata)',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 700,
+                fontSize: '0.8rem',
+                cursor: 'pointer'
+              }}
+              title="Profilo Utente"
+            >
+              AD
             </div>
           </div>
         </div>
-      </div>
+      ) : (
+        /* SINGLE PROJECT TOP BAR (WITH CHANNELS COUNTERS STRIP) */
+        <div className="pubblie-top-header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span
+              style={{
+                width: '12px',
+                height: '12px',
+                borderRadius: '50%',
+                backgroundColor: currentProject ? currentProject.color : 'var(--primary-granata)'
+              }}
+            />
+            <h1 className="pubblie-project-title">
+              {currentProject ? currentProject.name : 'PAA'}
+            </h1>
+          </div>
 
-      {/* Calendar Controls & Month Header */}
+          <div className="pubblie-channels-counters-strip">
+            {channels.map((ch) => {
+              let icon = null;
+              if (ch.platform === 'facebook') icon = <FacebookIcon className="svg-icon-sm" />;
+              else if (ch.platform === 'instagram') icon = <InstagramIcon className="svg-icon-sm" />;
+              else if (ch.platform === 'tiktok') icon = <TikTokIcon className="svg-icon-sm" />;
+              else if (ch.platform === 'youtube') icon = <YouTubeIcon className="svg-icon-sm" />;
+              else if (ch.platform === 'linkedin') icon = <LinkedInIcon className="svg-icon-sm" />;
+              else if (ch.platform === 'threads') icon = <ThreadsIcon className="svg-icon-sm" />;
+              else if (ch.platform === 'gmb') icon = <GoogleBusinessIcon className="svg-icon-sm" />;
+
+              const isAct = ch.active && ch.connected;
+
+              return (
+                <div
+                  key={ch.id}
+                  className="pubblie-channel-bubble-col"
+                  title={`${ch.name} - ${isAct ? 'Attivo' : 'Inattivo'}`}
+                  style={{ opacity: isAct ? 1 : 0.45 }}
+                >
+                  <div
+                    className="pubblie-channel-bubble-circle"
+                    style={{ border: `1.5px solid ${ch.color}` }}
+                  >
+                    <span style={{ color: ch.color }}>{icon}</span>
+                  </div>
+                  <span className="pubblie-channel-bubble-count">
+                    {ch.count || 0}
+                  </span>
+                </div>
+              );
+            })}
+
+            <div
+              className="pubblie-channel-bubble-col"
+              title="Gestisci o attiva canali"
+              onClick={onNavigateToChannels}
+              style={{ cursor: 'pointer' }}
+            >
+              <div className="pubblie-channel-bubble-circle add-btn">
+                <PlusIcon className="svg-icon-sm" />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CALENDAR CONTROLS SUBHEAD (MATCHING SCREENSHOT) */}
       <div className="pubblie-calendar-nav-bar">
         <div className="pubblie-cal-subhead">
           <h2>Calendario editoriale</h2>
         </div>
 
         <div className="pubblie-nav-actions-left">
-          <button className="pubblie-btn-nav" onClick={prevMonth}>
+          <button className="pubblie-btn-nav" onClick={prevMonth} title="Mese precedente">
             <ChevronLeftIcon className="svg-icon-sm" />
           </button>
-          <button className="pubblie-btn-nav" onClick={nextMonth}>
+          <button className="pubblie-btn-nav" onClick={nextMonth} title="Mese successivo">
             <ChevronRightIcon className="svg-icon-sm" />
           </button>
           <button className="pubblie-btn-nav today-btn" onClick={jumpToToday}>
@@ -228,9 +317,137 @@ export default function CalendarView({
         <div className="pubblie-month-display">
           ottobre 2026
         </div>
+
+        {/* Right side controls: Filtri and Mese / Settimana toggle */}
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* Filtri button */}
+          <div style={{ position: 'relative' }}>
+            <button
+              type="button"
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 12px',
+                background: selectedProjectFilter !== 'all' ? '#fef2f2' : '#ffffff',
+                border: selectedProjectFilter !== 'all' ? '1px solid var(--primary-granata)' : '1px solid var(--border-grid)',
+                borderRadius: '6px',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                color: selectedProjectFilter !== 'all' ? 'var(--primary-granata)' : '#475569',
+                cursor: 'pointer'
+              }}
+            >
+              <FilterIcon className="svg-icon-mini" />
+              <span>Filtri</span>
+              <span style={{ fontSize: '0.65rem' }}>▼</span>
+            </button>
+
+            {isFilterOpen && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '110%',
+                  right: 0,
+                  width: '220px',
+                  background: '#ffffff',
+                  border: '1px solid var(--border-grid)',
+                  borderRadius: '8px',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
+                  padding: '8px 0',
+                  zIndex: 40
+                }}
+              >
+                <div style={{ padding: '6px 14px', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                  Filtra per Progetto
+                </div>
+                <div
+                  onClick={() => {
+                    setSelectedProjectFilter('all');
+                    setIsFilterOpen(false);
+                  }}
+                  style={{
+                    padding: '8px 14px',
+                    fontSize: '0.8rem',
+                    fontWeight: selectedProjectFilter === 'all' ? 700 : 500,
+                    color: selectedProjectFilter === 'all' ? 'var(--primary-granata)' : '#334155',
+                    background: selectedProjectFilter === 'all' ? '#fef2f2' : 'transparent',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Tutti i progetti ({posts.length})
+                </div>
+                {projects.map((proj) => {
+                  const projPostsCount = posts.filter((p) => p.projectId === proj.id).length;
+                  return (
+                    <div
+                      key={proj.id}
+                      onClick={() => {
+                        setSelectedProjectFilter(proj.id);
+                        setIsFilterOpen(false);
+                      }}
+                      style={{
+                        padding: '8px 14px',
+                        fontSize: '0.8rem',
+                        fontWeight: selectedProjectFilter === proj.id ? 700 : 500,
+                        color: selectedProjectFilter === proj.id ? 'var(--primary-granata)' : '#334155',
+                        background: selectedProjectFilter === proj.id ? '#fef2f2' : 'transparent',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between'
+                      }}
+                    >
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: proj.color }} />
+                        {proj.name}
+                      </span>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{projPostsCount}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Mese / Settimana Toggle */}
+          <div style={{ display: 'inline-flex', border: '1px solid var(--border-grid)', borderRadius: '6px', overflow: 'hidden' }}>
+            <button
+              type="button"
+              onClick={() => setViewMode('month')}
+              style={{
+                padding: '6px 14px',
+                fontSize: '0.8rem',
+                fontWeight: viewMode === 'month' ? 800 : 600,
+                background: viewMode === 'month' ? '#1e293b' : '#ffffff',
+                color: viewMode === 'month' ? '#ffffff' : '#64748b',
+                border: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              Mese
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('week')}
+              style={{
+                padding: '6px 14px',
+                fontSize: '0.8rem',
+                fontWeight: viewMode === 'week' ? 800 : 600,
+                background: viewMode === 'week' ? '#1e293b' : '#ffffff',
+                color: viewMode === 'week' ? '#ffffff' : '#64748b',
+                border: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              Settimana
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Pubblie Calendar Grid */}
+      {/* CALENDAR GRID */}
       <div className="pubblie-grid-wrapper">
         {/* Days of week header row */}
         <div className="pubblie-days-header-row">
@@ -242,79 +459,111 @@ export default function CalendarView({
           ))}
         </div>
 
-        {/* Calendar weeks */}
-        {weeksData.map((week, wIdx) => (
-          <div key={wIdx} className="pubblie-week-row">
-            {/* Left week number column (Sm40, Sm41...) */}
-            <div className="pubblie-week-number-cell">
-              {week.weekNumber}
-            </div>
+        {/* Weeks rendering */}
+        {weeksData
+          .filter((_, idx) => (viewMode === 'week' ? idx === 4 : true))
+          .map((week, wIdx) => (
+            <div key={wIdx} className="pubblie-week-row">
+              <div className="pubblie-week-number-cell">
+                {week.weekNumber}
+              </div>
 
-            {/* 7 Days of this week */}
-            {week.days.map((dayObj, dIdx) => {
-              const postsForDay = posts.filter((p) => p.date === dayObj.dateStr);
-              const observances = OBSERVANCE_DAYS[dayObj.dateStr] || [];
+              {week.days.map((dayObj, dIdx) => {
+                const postsForDay = displayedPosts.filter((p) => p.date === dayObj.dateStr);
+                const observances = OBSERVANCE_DAYS[dayObj.dateStr] || [];
 
-              return (
-                <div
-                  key={dIdx}
-                  className={`pubblie-day-cell ${!dayObj.isCurrentMonth ? 'other-month' : ''} ${dayObj.isToday ? 'today-cell' : ''}`}
-                  onClick={() => onOpenComposer(dayObj.dateStr)}
-                  title="Clicca per programmare un post in questo giorno"
-                >
-                  <div className="pubblie-cell-header">
-                    <span className="pubblie-cell-date-num">{dayObj.dayNumber}</span>
-                  </div>
-
-                  {/* Scheduled Posts list */}
+                return (
                   <div
-                    className="pubblie-cell-posts-list"
-                    onClick={(e) => e.stopPropagation()}
+                    key={dIdx}
+                    className={`pubblie-day-cell ${!dayObj.isCurrentMonth ? 'other-month' : ''} ${dayObj.isToday ? 'today-cell' : ''}`}
+                    onClick={() => onOpenComposer(dayObj.dateStr)}
+                    title="Clicca per programmare un post"
                   >
-                    {postsForDay.map((post) => {
-                      const isStory = post.type === 'STORY';
-
-                      return (
-                        <div
-                          key={post.id}
-                          className="pubblie-card-post"
-                          onClick={() => onSelectPost(post)}
-                          title={post.content}
-                        >
-                          <div className="pubblie-card-pills-left">
-                            <span className={`pubblie-time-pill ${isStory ? 'story-pill' : 'feed-pill'}`}>
-                              <CheckIcon className="svg-icon-mini" />
-                              <span>{post.time}</span>
-                            </span>
-
-                            <span className={`pubblie-type-tag ${isStory ? 'story-tag' : 'feed-tag'}`}>
-                              {post.type}
-                            </span>
-                          </div>
-
-                          {/* Social destination circular icons */}
-                          {renderPlatformBadges(post.platforms)}
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Observance Days ("Giornate mondiali") */}
-                  {observances.length > 0 && (
-                    <div className="pubblie-observances-list">
-                      {observances.map((obs, oIdx) => (
-                        <div key={oIdx} className="pubblie-observance-item">
-                          <span className="obs-plus">+</span>
-                          <span className="obs-text">{obs}</span>
-                        </div>
-                      ))}
+                    <div className="pubblie-cell-header">
+                      <span className="pubblie-cell-date-num">{dayObj.dayNumber}</span>
                     </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        ))}
+
+                    {/* Posts list */}
+                    <div
+                      className="pubblie-cell-posts-list"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {postsForDay.map((post) => {
+                        const isStory = post.type === 'STORY';
+                        const isReel = post.type === 'REEL';
+
+                        return (
+                          <div
+                            key={post.id}
+                            className="pubblie-card-post"
+                            onClick={() => onSelectPost(post)}
+                            title={post.content}
+                            style={{
+                              borderLeft: isGlobalDashboard ? `3px solid ${post.projectColor || '#800020'}` : '1px solid #cbd5e1'
+                            }}
+                          >
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', width: '100%' }}>
+                              {/* If Global Dashboard: Show Project Name header on card (as in screenshot!) */}
+                              {isGlobalDashboard && (
+                                <div
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    marginBottom: '1px'
+                                  }}
+                                >
+                                  <span
+                                    style={{
+                                      fontSize: '0.64rem',
+                                      fontWeight: 800,
+                                      color: post.projectColor || '#334155',
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
+                                      whiteSpace: 'nowrap'
+                                    }}
+                                  >
+                                    {post.projectName || 'Progetto'}
+                                  </span>
+                                </div>
+                              )}
+
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <div className="pubblie-card-pills-left">
+                                  <span className={`pubblie-time-pill ${isStory ? 'story-pill' : isReel ? 'reel-pill' : 'feed-pill'}`}>
+                                    <CheckIcon className="svg-icon-mini" />
+                                    <span>{post.time}</span>
+                                  </span>
+
+                                  <span className={`pubblie-type-tag ${isStory ? 'story-tag' : isReel ? 'reel-tag' : 'feed-tag'}`}>
+                                    {post.type}
+                                  </span>
+                                </div>
+
+                                {renderPlatformBadges(post.platforms)}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Observances ("Giornate mondiali") */}
+                    {observances.length > 0 && (
+                      <div className="pubblie-observances-list">
+                        {observances.map((obs, oIdx) => (
+                          <div key={oIdx} className="pubblie-observance-item">
+                            <span className="obs-plus">+</span>
+                            <span className="obs-text">{obs}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
       </div>
     </div>
   );
